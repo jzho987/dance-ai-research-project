@@ -1,0 +1,35 @@
+\documentclass[11pt]{article}
+
+\usepackage{graphicx}
+\usepackage{cite}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\title{Overview Notes}
+\author{Jiazhi Zhou}
+\date{\today}
+
+\begin{document}
+\maketitle	
+
+\section{Generative AI General}
+
+Many existing dance generation AI models use an Auto Encoder to code complicated dance data into features that can be understood easier by neural networks. 
+\cite{Tang2018} uses an Long Short Term Memory auto encoder to capture the temporal structure of the dance data.
+\cite{Holden2016} uses a Convolutional auto encoder to encode data all at once, which is better for full dance generation than continuous generation like many other networks excel at doing.
+Vector Quantized Variational Auto Encoders have been proven to be quite good at the task of encoding dance data. \cite{Yao2023,Siyao2023} used VQVAEs for encoding dance data recursively, and achieved great results for dance quality and dance-to-music match.
+
+
+But even without training an auto encoder for translating complicated dance data into a latent space representation, some models still was able to perform relatively well. 
+\cite{Li2020, Li2021} both uses transformers to directly process the input. Two transformers are used to process the dance data as well as the processed audio data where the output are combined in a certain way to generate the output dance.
+
+\bibliographystyle{plain}
+\bibliography{mybib}
+
+\end{document}
