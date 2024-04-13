@@ -1,3 +1,5 @@
 # latex generated files
 *.aux
 *.pdf
+*.bbl
+*.blg
