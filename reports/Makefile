@@ -1,0 +1,6 @@
+compile_latex:
+	name='$(name)';\
+	pdflatex '$(name)'.tex;\
+	bibtex ${name};\
+	pdflatex '$(name)'.tex;\
+	pdflatex '$(name)'.tex
