@@ -162,3 +162,5 @@ cython_debug/
 # latex generated files
 *.aux
 *.pdf
+*.bbl
+*.blg
