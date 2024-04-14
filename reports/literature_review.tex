@@ -39,17 +39,70 @@ TODO: write
 
 \section{Deep Learning}
 
-Machine learning and deep learning has been a popular topic in recent years. Showing incredible results for text generation, image generation and much more.
-Using deep learning techniques to train machine learning models could enable the generation of realistic responses to user's full body inputs in a VR or public installation setting.
+Machine learning and deep learning has been a popular topic in recent
+years. Showing incredible results for text generation, image generation
+and much more.  Using deep learning techniques to train machine learning
+models could enable the generation of realistic responses to user's full
+body inputs in a VR or public installation setting.  This can not only
+prompt the users to explore different movements in order to have a
+better embodied experience, not also prompt user interactions with the
+installation, or become a potent tool for co-creative purposes
+\cite{Wallace2023}.  Different techniques and models will be reviewed
+and examined on their abilities to generate realistic, diverse and
+real-time dances for the purpose of an interactive AI agent.
 
-This can not only prompt the users to explore different movements in order to have a better embodied experience, not also prompt user interactions with the installation, or become a potent tool for co-creative purposes \cite{Wallace2023}.
-Different techniques and models will be reviewed and examined on their abilities to generate realistic, diverse and real-time dances for the purpose of an interactive AI agent.
+Alemi et al. explored the idea of an interactive AI agent
+\cite{Alemi2017}. Alemi et al. compared the Factored Conditional
+Restricted Boltzman Machine (FCRBM) and a Long Short Term Memory (LSTM)
+network. And at the time, there was not a large public annotated dance
+dataset available like AIST++ \cite{Li2021}, so Alemi et al. had to
+record their own dance data which only consisted of 4 dance performances
+and a total of 23 minutes of dance and audio data.
 
-Alemi et al. explored the idea of an interactive AI agent \cite{Alemi2017}. Alemi et al. compared the Factored Conditional Restricted Boltzman Machine (FCRBM) and a Long Short Term Memory (LSTM) network. And at the time, there was not a large public annotated dance dataset available like AIST++ \cite{Li2021}, so Alemi et al. had to record their own dance data which only consisted of 4 dance performances and a total of 23 minutes of dance and audio data.
+Bailando++ is neural netowrk model that generates dances based off of
+the previously generated dance sequences \cite{Siyao2023}. The
+Bailando++ model is a VQVAE and a Generative Pre-trained Transformer
+(GPT) that generates dances from a previous dance sequence and dances in sync
+to the music. The model is trained to dance to the music through
+the "Actor Critic" learning stage which leverages
+reinforcement learning and uses beat-alignment as part of the reward function. This
+model was able to achieve top-of-the-line results in motion quality, as
+well as motion diversity compared to other
+popular dance AI models at the time, including DanceNet,
+DanceRevolution, FACT and Li et al. Bailando++ also preformed well in
+the user study where users are shown 60 pairs of dances by different
+models and voted on "which one is dancing better to the music", where it
+was able to achieve at least 88\% win rate against all of the models.
+Although Bailando++ focused heavily on the ability to dance to the
+music, it is likely that for the purpose of our experiments, the ability
+to dance to the music is not as important, as care more about the
+ability to prompt interaction. But the technique of using actor-critic
+learning can be used in our own model.
 
 
+Dance with you (DanY) \cite{Yao2023} is a neural network model that generates
+dances for a partner dancer for a lead dancer. The model uses a three
+stage network that also leverages a VQVAE for encoding and decoding, and
+U-Net Models. VQVAE is an auto encoder network which can turn complicated dance data sequences into quantized
+codes from a finite code book that is learned through the training of
+the VQVAE, and the U-Net takes noised data and turns them into dances
+features in the code book, which turns random gaussian noise into
+realistic dances. The difference of the DanY model is that not only does
+it generate from the condition of audio data like many other models, but
+it also generates based on the condition of the lead dancer's dance
+sequence. This is important for us since we want to deploy an
+interactive AI agent which dances in accordance to the lead dancer, who,
+in this case, is the user. The quantitative results from this 
+Their proposed AIST-M dataset is a dance dataset that contains
+Lead-Partner dancer pair annotation great for training models to
+generate partner dances from a lead dance sequence. The techniques they used followed that of the creation of the
+AIST++ dataset \cite{Li2021} including tracking, SMPL mesh fitting, and
+optimization for filtering out undesirable frames to ensure the quality
+of the dance data. The proposed AIST-M dataset will be incredibly useful
+for our own models' training and analysis.
 
 \section*{Acknowledgements}
+
 Thanks to ...
 
 \bibliographystyle{plain} 
