@@ -61,16 +61,19 @@ jobs:
           cd reports
           pdflatex literature_review.tex
 
-      - name: Add and commit changes
+      - name: Stash changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
           git stash --all
+          git fetch
+
+      - name: Commit and push
+        run: |
           git checkout reports
           git status
-          git status
-          git apply
+          git stash apply
           git add -f reports/*.pdf
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git commit -m "Build reports (SHA: ${{ github.sha }})" || true
 
       - name: Push changes to reports branch
