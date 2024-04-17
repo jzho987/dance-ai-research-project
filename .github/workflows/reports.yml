@@ -23,7 +23,7 @@ jobs:
         id: changed_files
         run: |
           git fetch origin ${GIT_BRANCH_NAME}
-          git diff --name-only origin/${GIT_BRANCH_NAME} HEAD | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
+          git diff --name-only origin/report/test HEAD | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
 
       - name: Check if there are any changed files
         run: |
