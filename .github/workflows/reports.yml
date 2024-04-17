@@ -37,17 +37,31 @@ jobs:
       #       cd reports && make compile_latex name=${file##reports/}
       #     done < changed_files.txt
       
-      - name: Build reports
+      - name: Build reports - init
         run: |
+          ls
           cd reports
           pdflatex literature_review.tex
+
+      - name: Build reports - bib
+        run: |
+          ls
           bibtex literature_review
+
+      - name: Build reports - final 1
+        run: |
+          ls
           pdflatex literature_review.tex
+
+      - name: Build reports - finish
+        run: |
+          ls
           pdflatex literature_review.tex
           cd ..
 
       - name: Add and commit changes
         run: |
+          git status
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git stash --include-untracked
