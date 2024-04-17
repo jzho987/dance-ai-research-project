@@ -2,7 +2,7 @@ name: Build Reports
 
 on:
   push:
-    branches: [ report/test ]
+    branches: [ main ]
 
 jobs:
   build:
