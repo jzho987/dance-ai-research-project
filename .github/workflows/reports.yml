@@ -46,22 +46,13 @@ jobs:
           pdflatex literature_review.tex
           cd ..
 
-      - name: Create reports branch
-        uses: actions/checkout@v4
-        with:
-          ref: 'refs/heads/reports'
-          # fetch: false
-
-      - name: Copy generated PDFs
-        run: |
-          for file in $(find reports -name "*.pdf"); do
-            cp "$file" "reports/"
-          done
-
       - name: Add and commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          git stash --include-untracked
+          git checkout reports
+          git apply
           git add -f reports/*.pdf
           git commit -m "Build reports (SHA: ${{ github.sha }})" || true
 
