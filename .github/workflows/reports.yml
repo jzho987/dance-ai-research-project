@@ -16,7 +16,7 @@ jobs:
 
       - name: Find changed files in reports folder
         run: |
-          git diff --name-only ${{ github.sha }}~1 | grep -E '^reports/.*\.tex$' > changed_files.txt
+          git diff --name-only ${{ github.sha }}~1 | grep -E '^reports/.*\.tex$' > reports/changed_files.txt
 
       - name: Check if there are any changed files
         run: |
@@ -29,26 +29,30 @@ jobs:
 
       - name: Generate aux
         run: |
+          cd reports
           while IFS= read -r file; do
-              pdflatex "$file"
+              pdflatex "$(basename file)".tex
           done < changed_files.txt
 
       - name: Build bib
         run: |
+          cd reports
           while IFS= read -r file; do
               bibtex "${file%.tex}"
           done < changed_files.txt
 
       - name: Use bib
         run: |
+          cd reports
           while IFS= read -r file; do
-              pdflatex "$file"
+              pdflatex "$(basename file)".tex
           done < changed_files.txt
 
       - name: Final latex
         run: |
+          cd reports
           while IFS= read -r file; do
-              pdflatex "$file"
+              pdflatex "$(basename file)".tex
           done < changed_files.txt
 
       - name: Stash changes
