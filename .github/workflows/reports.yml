@@ -10,56 +10,49 @@ jobs:
     permissions:
       contents: write
     steps:
-      # - name: Git branch name
-      #   id: git-branch-name
-      #   uses: EthanSK/git-branch-name-action@v1
-        
       - uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: Find changed files in reports folder
+        id: changed_files
+        run: |
+          git diff --name-only HEAD~1 | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
+
+      - name: Check if there are any changed files
+        run: |
+            if [[ ! -s changed_files.txt ]]; then
+              exit 0;
+            fi
+
+      - name: Install latex package
         run: sudo apt-get install texlive-latex-extra make
 
-      # - name: Find changed files in reports folder
-      #   id: changed_files
-      #   run: |
-      #     git fetch origin report/test
-      #     git diff --name-only origin report/test HEAD | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
-
-      # - name: Check if there are any changed files
-      #   run: |
-      #       if [[ ! -s changed_files.txt ]]; then
-      #         exit 0;
-      #       fi
-
-      # - name: Build reports
-      #   run: |
-      #     while IFS= read -r file; do
-      #       cd reports && make compile_latex name=${file##reports/}
-      #     done < changed_files.txt
-      
-      - name: Build reports - init
+      - name: Generate aux
         run: |
-          ls
           cd reports
-          pdflatex literature_review.tex
+          while IFS= read -r file; do
+              pdflatex "$file"
+          done < changed_files.txt
 
-      - name: Build reports - bib
+      - name: Build bib
         run: |
-          ls
           cd reports
-          bibtex literature_review
+          while IFS= read -r file; do
+              bibtex "${file%.tex}"
+          done < changed_files.txt
 
-      - name: Build reports - final 1
+      - name: Use bib
         run: |
-          ls
           cd reports
-          pdflatex literature_review.tex
+          while IFS= read -r file; do
+              pdflatex "$file"
+          done < changed_files.txt
 
-      - name: Build reports - finish
+      - name: Final latex
         run: |
-          ls
           cd reports
-          pdflatex literature_review.tex
+          while IFS= read -r file; do
+              pdflatex "$file"
+          done < changed_files.txt
 
       - name: Stash changes
         run: |
