@@ -40,11 +40,11 @@ jobs:
       - name: Build reports
         run: |
           cd reports
-          ls
-          make compile_latex name=literature_review
-          ls
+          pdflatex literature_review.tex
+          bibtex literature_review
+          pdflatex literature_review.tex
+          pdflatex literature_review.tex
           cd ..
-          ls
 
       - name: Create reports branch
         uses: actions/checkout@v4
