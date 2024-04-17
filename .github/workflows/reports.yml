@@ -31,28 +31,28 @@ jobs:
         run: |
           cd reports
           while IFS= read -r file; do
-              pdflatex "$(basename $file)".tex
+              pdflatex "$(basename $file)"
           done < changed_files.txt
 
       - name: Build bib
         run: |
           cd reports
           while IFS= read -r file; do
-              bibtex "$(basename $file)"
+              bibtex "${$(basename $file)%.tex}"
           done < changed_files.txt
 
       - name: Use bib
         run: |
           cd reports
           while IFS= read -r file; do
-              pdflatex "$(basename $file)".tex
+              pdflatex "$(basename $file)"
           done < changed_files.txt
 
       - name: Final latex
         run: |
           cd reports
           while IFS= read -r file; do
-              pdflatex "$(basename $file)".tex
+              pdflatex "$(basename $file)"
           done < changed_files.txt
 
       - name: Stash changes
