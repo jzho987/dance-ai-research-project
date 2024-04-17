@@ -46,18 +46,20 @@ jobs:
       - name: Build reports - bib
         run: |
           ls
+          cd reports
           bibtex literature_review
 
       - name: Build reports - final 1
         run: |
           ls
+          cd reports
           pdflatex literature_review.tex
 
       - name: Build reports - finish
         run: |
           ls
+          cd reports
           pdflatex literature_review.tex
-          cd ..
 
       - name: Add and commit changes
         run: |
