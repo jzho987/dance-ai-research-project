@@ -68,7 +68,7 @@ jobs:
 
       - name: Commit and push
         run: |
-          git checkout reports
+          git checkout reports --
           git status
           git stash apply
           git add -f reports/*.pdf
