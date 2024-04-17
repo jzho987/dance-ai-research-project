@@ -10,10 +10,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        run: |
-          git fetch origin report/test
-          git checkout report/test
+      - uses: actions/checkout@v2
 
       - name: Find changed files in reports folder
         run: |
