@@ -10,38 +10,42 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Git branch name
-        id: git-branch-name
-        uses: EthanSK/git-branch-name-action@v1
+      # - name: Git branch name
+      #   id: git-branch-name
+      #   uses: EthanSK/git-branch-name-action@v1
         
       - uses: actions/checkout@v2
 
       - name: Install dependencies
         run: sudo apt-get install texlive-latex-base make
 
-      - name: Find changed files in reports folder
-        id: changed_files
-        run: |
-          git fetch origin report/test
-          git diff --name-only origin report/test HEAD | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
+      # - name: Find changed files in reports folder
+      #   id: changed_files
+      #   run: |
+      #     git fetch origin report/test
+      #     git diff --name-only origin report/test HEAD | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
 
-      - name: Check if there are any changed files
-        run: |
-            if [[ ! -s changed_files.txt ]]; then
-              exit 0;
-            fi
+      # - name: Check if there are any changed files
+      #   run: |
+      #       if [[ ! -s changed_files.txt ]]; then
+      #         exit 0;
+      #       fi
 
+      # - name: Build reports
+      #   run: |
+      #     while IFS= read -r file; do
+      #       cd reports && make compile_latex name=${file##reports/}
+      #     done < changed_files.txt
+      
       - name: Build reports
         run: |
-          while IFS= read -r file; do
-            cd reports && make compile_latex name=${file##reports/}
-          done < changed_files.txt
+          cd reports && make compile_latex name=literature_review
 
       - name: Create reports branch
         uses: actions/checkout@v4
         with:
           ref: 'refs/heads/reports'
-          fetch: false
+          # fetch: false
 
       - name: Copy generated PDFs
         run: |
