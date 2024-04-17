@@ -63,6 +63,7 @@ jobs:
       - name: Commit and push
         run: |
           git checkout reports --
+          rm reports/*.pdf
           git stash apply
           git add -f reports/*.pdf
           git config user.name "github-actions"
