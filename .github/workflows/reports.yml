@@ -38,7 +38,7 @@ jobs:
         run: |
           cd reports
           while IFS= read -r file; do
-              bibtex "${$(basename $file)%.tex}"
+              bibtex "$(basename $file .tex)"
           done < changed_files.txt
 
       - name: Use bib
