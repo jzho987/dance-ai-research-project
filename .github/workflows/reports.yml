@@ -10,12 +10,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
+      - name: Checkout
+        run: |
+          git fetch origin report/test
+          git checkout report/test
 
       - name: Find changed files in reports folder
-        id: changed_files
         run: |
           git diff --name-only HEAD~1 | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
 
@@ -59,7 +59,7 @@ jobs:
       - name: Stash changes
         run: |
           git stash --all
-          git fetch
+          git fetch origin reports
 
       - name: Commit and push
         run: |
