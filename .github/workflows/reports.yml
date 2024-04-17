@@ -16,7 +16,7 @@ jobs:
 
       - name: Find changed files in reports folder
         run: |
-          git diff --name-only "${GITHUB_SHA}"~1 | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
+          git diff --name-only ${{ github.ref_name }}~1 | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
 
       - name: Check if there are any changed files
         run: |
