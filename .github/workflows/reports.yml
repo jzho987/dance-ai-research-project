@@ -16,6 +16,7 @@ jobs:
 
       - name: Find changed files in reports folder
         run: |
+          echo "${GITHUB_SHA}"
           git diff --name-only ${GITHUB_SHA}~1 | grep -E '^reports/.*\.(tex|bib)$' > changed_files.txt
 
       - name: Check if there are any changed files
