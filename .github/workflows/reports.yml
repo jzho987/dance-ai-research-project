@@ -39,7 +39,12 @@ jobs:
       
       - name: Build reports
         run: |
-          cd reports && make compile_latex name=literature_review
+          cd reports
+          ls
+          make compile_latex name=literature_review
+          ls
+          cd ..
+          ls
 
       - name: Create reports branch
         uses: actions/checkout@v4
