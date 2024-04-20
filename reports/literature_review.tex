@@ -33,9 +33,7 @@ ground zero for designing co-creative systems. Getting users engaged,
 inspired, and actively participating in the co-creative process comes
 from good interaction design, however, as \cite{Rezwana2023} pointed
 out, many recent research into co-creative AI focus on model performance
-but neglect the importance of interaction design. This section of the
-review will focus on identifying a suitable framework to adopt for
-interaction design, and analysis for our research.
+but neglect the importance of interaction design. 
 
 Wallace et al. performed a workshop studying the expectations from
 professional dancers for an AI dance partner \cite{Wallace2023}. The workshop introduced to
@@ -58,10 +56,63 @@ fluid interaction process and allowing them to not look at each other
 all the time. This also comes from having a shared image or
 understanding of the creative process. These themes should be taken into
 consideration for how a dance generation AI should behave from the
-perspective of professional dancers, however, this could differ for non-dancers.
+perspective of professional dancers, however, this could differ for
+non-dancers.
+
+Winston and Magerko explored the interactions of non-dancers with the
+interactive public installation: LuminAI, and proposed and analyzed a
+new framework that they named TT-VAI, which take into consideration, of
+a leader and follower during the dance \cite{Winston2017}. 
+These cues are explored via implementing a
+turn-taking system on the LuminAI framework, to create a new version
+that they named, TT-VAI. Winston and Magerko first observed the dancers
+performance and through observation, identified that dancers can use
+cues like gaze, heptic feedback in the form of applying pressure to the
+follower's arm, and energy. The base version of LuminAI and TT-VAI are
+studied in a user study. Certain motion cues are used by TT-VAI as a
+turn-taking cue, including energy, tempo, and size, since gaze and
+heptic are not feasible cues for a AI dancer avatar. Out of the two versions of the
+model, the turn taking model was disliked by a few users, who preferred
+less "back-and-forth" and preferred more natural interactions and felt
+more inspired. 2 users preferred the turn-taking one as it was providing
+more than just copying. Mimicry by the agent, however, showed positive
+feedback from several participants of the user study, since the agent is
+deemed "more responsive to my movement." The research highlighted
+interesting ideas in how a sense of leadership state effect's the user's
+perception of the model, and how mimicry or being a follower by the
+model can provide benefits for improved user perception. Tuning the
+agents turn-taking decision making process, and potentially biasing it
+towards humans leading could be done to improve the user experience in
+future works.
+
+There are some similarities and difference between what Wallace's work
+and what Winston and Magerko's work identified. Both Wallace and
+Winstons work discussed mimicry, but Wallace's work showed that expert
+dancers often mimic movement aspects like the trajectory of movement,
+rather than mimicing the movement directly. In this case, both
+identified the necessity of mimicry but on different levels. Wallace et
+al. also identified that expert dancers want the AI to create something
+new when they are running out of ideas, to keep the improvisation going.
+There were conflicting views from Winston and Magerko's study, where
+only 2 people showed interest in the AI being more autonomous and the
+rest enjoyed when the AI mimiced their movement, and the idea of
+enjoying user led interaction is further supported by other work shown
+in Winston and Magerko's article. This could be a major
+difference in requirements from professional dancers and the general
+public. Another point discussed by Wallace et al. but not touched on by
+Winston and Magerko, was how the existence of glitches could positively
+effect the professional dancers, since it gave them new ideas. However,
+the glitching when shown to the general public, could be an issue as
+glitchy movements could potentially deter users and make them think the
+AI is faulty and bad. Wallace et al, and Winston and Magerko did find some important
+insights, but their population size is rather small, and surverying a
+larger amount of people with varying experience could reveal more
+insights into the difference of requirements from different groups of
+people, and find out how we can consolidate these differences.
 
 Rezwana and Maher proposed a novel framework for designing co-creative
-interaction called the COFI. This framework breaks the co-creative
+interaction called the COFI which can help put the requirements gathered
+from both researches into more concrete terms. This framework breaks the co-creative
 interaction down to low level aspects. This includes: what collaboration style
 and communication style does the framework have, is the creative process
 a generative process, or a evaluation process or a definition process, how does the AI
@@ -95,7 +146,28 @@ performing the task of leading, and the other is performing the task of
 following, and since in the article, Rezwana and Maher mentioned how
 performing the same task often requires turn-taking, this shows us that
 we should model the task as being, leader and a follower, and the tasks
-are performed in parallel.
+are performed in parallel. For the contribution type, it is challenging
+to pin point to one, since the dancers from Wallace's work mentioned
+that, their partner should both build onto their movements, so extend
+and transform, or that their partner should break the shared image, so
+create new. But the embodied co-creative system should perhaps be
+viewed, not as the movement in the moment, but as the entirety of the dance.
+
+The requirements idenfieid by Winston and Magerko can also be put in
+terms of the COFI framework. 
+
+\subsubsection{Interaction Analysis}
+
+Being able to analyze interactions in a quantifiable way is critical to
+gathering important insights for any user study around Human-AI
+co-creative interactions. There are a few frameworks currently, in the
+space of quantifying interaction in a meaningful way. The effectiveness
+of the frameworks is important to discuss as to identify a preferred way
+to quantify interaction quality.
+
+% CSI
+
+% OCSM
 
 % EVERYTHING BELOW ARE UNORGANIZED
 
@@ -112,30 +184,6 @@ vision to take cues, while the non-performers were seen exchanging gazes to
 communicate. This shows that expert dancers have intuition for
 turn-taking cues, and that non-dancers will require much more explicit cues
 or take longer to initiate a turn-take.
-
-Winston and Magerko explored turn-taking of leadership in a parallel
-collaboration style.
-\cite{Winston2017}. These cues are explored via implementing a
-turn-taking system on the LuminAI framework, to create a new version
-that they named, TT-VAI. Winston and Magerko first observed the dancers
-performance and through observation, identified that dancers can use
-cues like gaze, heptic feedback in the form of applying pressure to the
-follower's arm, and energy. The base version of LuminAI and TT-VAI are
-studied in a user study. Certain motion cues are used by TT-VAI as a
-turn-taking cue, including energy, tempo, and size, since gaze and
-heptic are not feasible cues for a AI dancer avatar. Out of the two versions of the
-model, the turn taking model was disliked by a few users, who preferred
-less "back-and-forth" and preferred more natural interactions and felt
-more inspired. 2 users preferred the turn-taking one as it was providing
-more than just copying. Mimicry by the agent, however, showed positive
-feedback from several participants of the user study, since the agent is
-deemed "more responsive to my movement." The research highlighted
-interesting ideas in how a sense of leadership state effect's the user's
-perception of the model, and how mimicry or being a follower by the
-model can provide benefits for improved user perception. Tuning the
-agents turn-taking decision making process, and potentially biasing it
-towards humans leading could be done to improve the user experience in
-future works.
 
 One interesting difference spoted between Winston and Magerko's work, and
 Wallace et al. and Evola et al.'s is that Winston and Magerko identified explicit
