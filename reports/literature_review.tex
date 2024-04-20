@@ -25,7 +25,54 @@ domains, as well as providing insights into what could have been done
 better, existing models that work well, and how we can model
 human-to-robot dance interactions well.
 
-\subsection{Interaction and Turn-taking}
+\subsection{Co-Creative Interactions}
+
+Interaction design in Human-Robot co-creative systems is important.
+Kantosalo et al. \cite{HUHUH} said that interaction design should be
+ground zero for designing co-creative systems. Getting users engaged,
+inspired, and actively participating in the co-creative process comes
+from good interaction design, however, as \cite{Rezwana2023} pointed
+out, many recent research into co-creative AI focus on model performance
+but neglect the importance of interaction design. This section of the
+review will focus on identifying a suitable framework to adopt for
+interaction design, and analysis for our research.
+
+Wallace et al. performed a workshop studying the expectations from
+professional dancers for an AI dance partner \cite{Wallace2023}. The workshop introduced to
+the dancers on a high level, how a dance generation AI would work. The
+dancers are then put into pairs, where one of the dancer from the pair
+would explore the role of an AI dancer, and the other one would explore
+the role of the user of the AI. The workshop ended with a qualitative
+feedback session which resulted in important insights into co-creative
+process for dancers. One important theme that a lot of the dancers
+mentioned in their feedback was "shared images", more specifically,
+having a shared language and understanding of their work, and then,
+breaking of the image, allowing them to continue the creative process
+exploring other directions, when the current creative direction runs
+dry. Another theme was that human dancers would eventually get tired, or
+experience physical constraints to their body, but they thought AI
+dancers can explore impossible positions which can act as inspiration
+rather than a negative. The final theme was that dancers have the
+intuition to perdict what their partner will do, resulting in a more
+fluid interaction process and allowing them to not look at each other
+all the time. This also comes from having a shared image or
+understanding of the creative process.
+
+Rezwana and Maher proposed a novel framework for designing co-creative
+interaction called the COFI. This framework breaks the co-creative
+interaction down to low level aspects. This includes: what collaboration style
+and communication style does the framework have, is the creative process
+a generative process, or a evaluation process or a definition process, how does the AI
+contribute to that process, and how much should the AI contribute
+compared to the human contribution. The exact framework breaks this down
+in a bit more detail, but as an overview, COFI allows us a way to group
+different interaction frameworks and compare them to each other. Rezwana
+and Maher also mentioned that there are two types of co-creative
+processes involving AI, one being a pleasing interaction, and one being
+a provoking interaction. A pleasing interaction would have the AI create
+what the human wants, while a provoking interaction would have the AI
+provide inspiration to the human through "breaking the shared image",
+spoken in the language by Wallace et al.
 
 Turn-taking is an important concept to consider when thinking about
 interactions between human and robots (AI). When having conversations,
@@ -38,7 +85,124 @@ follower concept are less apparent, since both parties are dancing at
 the same time. Understanding the dynamics of leader and follower, how
 turn-taking occurs in dance, and how the user performs while being a
 leader and a follower is critical for human and computer to be able to
-interact naturally.
+interact naturally. Turn taking fits into the current model of
+co-creative interaction being the creative process. Since if the human
+leads most of the interaction, then the model would mostly be a pleasing
+model, while if the AI is allowed to be the leader sometimes, it can
+become more provoking and inspiring.
+
+When considering how turn-taking should occur, it is critical to observe
+the difference of turn-taking done by professional to that of the
+average person, as different frameworks might have to adopted for the
+purpose of a public installation vs for co-creative dance agent. 
+The difference how experienced dancers and non-performers communicate
+and turn-take is studied by Evola et al. to gain understanding of how
+experts are able to come to an agreement on the leadership state without
+much inter-subjectivity \cite{Evola}. A improvisational performance
+is used as the framework for the user study, where users in a group of 6
+can take turns to construct an art piece. 
+The turn-taking sections of the performances are analyzed.
+The expert performers did not performing any "communicative movement", but
+rather using observations from their parafoveal and peripheral
+vision to take cues, while the non-performers were seen exchanging gazes to
+communicate. The ability to use context clues to understand turn-taking
+cues seem to align with the research into speech turn-taking, which
+explains how the expert performers' turn-taking and human-to-human speech
+turn-taking can be performed with so much fluidity. But when less experienced
+people that do not have a shared "language" or cues try to perform turn-taking,
+they perform less naturally.
+
+Turn-yielding cues, as well as turn-taking cues are also a concept in
+dance turn-taking explored by Winston and Magerko
+\cite{Winston2017}. These cues are explored via implementing a
+turn-taking system on the LuminAI framework, to create a new version
+that they named, TT-VAI. Winston and Magerko first observed the dancers
+performance and through observation, identified that dancers can use
+cues like gaze, heptic feedback in the form of applying pressure to the
+follower's arm, and energy. The base version of LuminAI and TT-VAI are
+studied in a user study. Certain motion cues are used by TT-VAI as a
+turn-taking cue, including energy, tempo, and size, since gaze and
+heptic are not feasible cues for a AI dancer avatar. Out of the two versions of the
+model, the turn taking model was disliked by a few users, who preferred
+less "back-and-forth" and preferred more natural interactions and felt
+more inspired. 2 users preferred the turn-taking one as it was providing
+more than just copying. Mimicry by the agent, however, showed positive
+feedback from several participants of the user study, since the agent is
+deemed "more responsive to my movement." The research highlighted
+interesting ideas in how a sense of leadership state effect's the user's
+perception of the model, and how mimicry or being a follower by the
+model can provide benefits for improved user perception. Tuning the
+agents turn-taking decision making process, and potentially biasing it
+towards humans leading could be done to improve the user experience in
+future works.
+
+One interesting difference spoted between Winston and Magerko's work, and
+Wallace et al. and Evola et al.'s is that Winston and Magerko identified explicit
+turn-taking cues while both Wallace and Evola identified the lack of
+obvious cues displayed when dancing. This difference can be from the
+forms of dancing that they studied, since Winston and Magerko studied
+""" and Wallace et al. and Evola et al. both studied improvisational
+dance. This could mean that either turn-taking is a way more natural
+process in improvisational dance, and there are no clear leader or
+follower, or that the dancers do not have a clear idea of who is leading
+and who is following, but simply "do", quoting from a participant of
+Wallace et al's workshop. If the turn-taking aspect of improvisational
+dancing is less, then an effective communication framework could either
+be impossible or not useful, and rather focusing on building a shared
+image is more important. However, one form of turn-taking discussed
+by Wallace is the breaking of shared images. This is the process of
+switching the direction of the creative work and starting in a new
+direction. Participants idenfied this to being an important expectation
+they have from their dance partner. So maybe rather than taking turns,
+the AI need to identify when the user is loosing inspiration and provoke
+them back into a leading state.
+
+... performed a user study to analyze the effectiveness of two-way
+communication in human-AI co-creative system. The system they studied
+was called: "Creative Penpal", which is a co-creative drawing program,
+where the AI can generate refined and inspiring sketches from user's
+line sketch. The user study learned that users prefer the two-way
+communication system, where the AI would use text instructions to
+communicate with the user, and provide them with options during their
+creative process to see inspiring sketches, provide feedback etc. The
+qualitative insights gathered mentioned how the users felt more engaged
+when the AI provided feedback, and felt more like working with a partner
+which they enjoyed. Another theme that was important was that users
+identified they enjoyed having control over the AI's input.
+
+Two-way communication in embodied interaction, however, does not mean
+explicit vocal commands, and in the case of the game study from Evola et
+al.'s work \cite{Evola}, there are not even explicit communication
+movements done, by the experts, but they were able to be in sync and
+take turns appropriately. The ability to communicate without
+communicating can be a display of the "intuition flow" identified by
+Wallace et al.'s work.
+
+Both Wallace et al. and Evola et al. identified the importance of having
+intuition and a "shared image" when trying to perform seemlessly.
+Wallace identified that dancers often predict what their partner will
+do, and Evola showed that expert dancers can use context to gain
+understanding of turn-taking cues, while non-dancers need explicit gaze
+exchange as a way to communicate. 
+
+
+CSI is a ...
+
+... proposed a way to quickly and effectively label interactions using
+three curves:...
+The main problem that this framework experienced is the resolution of
+the curves produced, as shown in their graph, the alignment of the
+curves only aligned on average per minute to 2 minutes, and any
+timeframe studied less than a minute has significant variance. This,
+although could be used as a reward system for machine learning
+algorithms, might not be good for a high quality analysis. However, we
+can still study the effectiveness of implementing this framework to
+automatically encode interaction data in real-time and design a reward
+algorithm to make the system perform better in the interaction.
+
+A two-way communication system should be explored in our interaction
+system, although, the communication would be different since embodied
+interactions naturally have a communication aspect.
 
 Turn-taking in speech is a good topic to study and some important
 aspects of turn-taking could be transferred from speech turn-taking to
@@ -70,47 +234,6 @@ prediction for the experiment ran by Thomaz and Chao are the MNI point,
 where the human can predict the rest of the words, as the phrases are
 pre-set.
 
-When considering how turn-taking should occur, it is critical to observe
-the difference of turn-taking done by professional to that of the
-average person, as different frameworks might have to adopted for the
-purpose of a public installation vs for co-creative dance agent. 
-The difference how experienced dancers and non-performers communicate
-and turn-take is studied by Evola et al. to gain understanding of how
-experts are able to come to an agreement on the leadership state without
-much inter-subjectivity. A improvisational performance
-is used as the framework for the user study, where users in a group of 6
-can take turns to construct an art piece. 
-The turn-taking sections of the performances are analyzed.
-The expert performers did not performing any "communicative movement", but
-rather using observations from their parafoveal and peripheral
-vision to take cues, while the non-performers were seen exchanging gazes to
-communicate. The ability to use context clues to understand turn-taking
-cues seem to align with the research into speech turn-taking, which
-explains how the expert performers' turn-taking and human-to-human speech
-turn-taking can be performed with so much fluidity. But when less experienced
-people that do not have a shared "language" or cues try to perform turn-taking,
-they perform less naturally.
-
-Turn-yielding cues, as well as turn-taking cues are also a concept in dance turn-taking explored by Winston and Magerko
-\cite{Winston2017}. These cues are explored via implementing a
-turn-taking system on the LuminAI framework, to create a new version
-that they named, TT-VAI. The base version of LuminAI and TT-VAI are
-studied in a user study. Certain motion cues are used by TT-VAI as a
-turn-taking cue, including energy, tempo, and size. Out of the two versions of the
-model, the turn taking model was disliked by a few users, who preferred
-less "back-and-forth" and preferred more natural interactions and felt
-more inspired. 2 users preferred the turn-taking one as it was providing
-more than just copying. Mimicry by the agent, however, showed positive
-feedback from several participants of the user study, since the agent is
-deemed "more responsive to my movement." The research highlighted
-interesting ideas in how a sense of leadership state effect's the user's
-perception of the model, and how mimicry or being a follower by the
-model can provide benefits for improved user perception. Tuning the
-agents turn-taking decision making process, and potentially biasing it
-towards humans leading could be done to improve the user experience in
-future works.
-
-TODO: write about B Wallace's work
 The concept of breaking shared images from Wallace et al.'s work, can
 fit into the turn-taking paradigm where breaking of shared image is a
 way that the partner has used to take the leadership and shift the
