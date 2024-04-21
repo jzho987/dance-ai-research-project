@@ -20,26 +20,35 @@ model.
 
 TODO: write
 
-\section{Literature Review}
+\section{Existing work}
 
-A literature review is conducted on the domain of human-to-robot
-interaction and AI generative dances. The goal of the review is to gain
-an initial understanding of the work that is being done in these
-domains, as well as providing insights into what could have been done
-better, existing models that work well, and how we can model
-human-to-robot dance interactions well.
+TODO: write
 
-\subsection{Human-AI interaction During Co-creative Process}
+% introduction
 
-Interaction design in Human-Robot co-creative systems is important.
-Kantosalo et al. \cite{Kantosalo2020} said that interaction design should be
-ground zero for designing co-creative systems. Getting users engaged,
-inspired, and actively participating in the co-creative process comes
-from good interaction design, however, as \cite{Rezwana2023} pointed
-out, many recent research into co-creative AI focus on model performance
-but neglect the importance of interaction design.
+% topic overviews
 
-\subsubsection{Existing studies}
+\subsection{Human-Co-Creative-Agent Interaction}
+% introduction leading to topics
+Interaction design in Human-Robot co-creative systems are important.
+Studies have shown that a system with good interaction design, like
+providing feedback, allowing for multiple people to interact, etc. have
+proven to improve people's perception and attitude towards to the AI,
+and be more inspired, and lead to facilitating positive social
+interactions \cite{Long2019, Rezwana2022}. Kantosalo et al. said that:
+interaction design should be ground zero for designing co-creative
+systems \cite{Kantosalo2020}.  Despite this, many AI research failed to
+consider this, and focus on the model but neglect the interaction
+\cite{Rezwana2023}. So to ensure our agent will have high quality
+interactions with the users, we gather important interaction design
+requirements from all the critical stakeholders, including professional
+dancers, and the general public alike. This will first be done, through an literature
+review and analysis of critical modern co-creative AI systems. And a
+dive into the interaction design and analysis space will be done, in
+order to facilitate a more systemic way to design and study these
+interactions.
+
+\subsubsection{Requirements and Expectations on Co-Creative Interaction Systems}
 % review of wallace's workshop
 Wallace et al. performed a workshop studying the expectations from
 professional dancers for an AI dance partner \cite{Wallace2023}. The workshop introduced to
@@ -65,56 +74,31 @@ consideration for how a dance generation AI should behave from the
 perspective of professional dancers, however, this could differ for
 non-dancers.
 
-% review of LuminAI
-% TODO: Write
-
 % review of d longs article on public installation design
-Long et al. analyzed many existing works on co-creative AI for public
-installations, and identified themes for interaction design that will
-make the installation more successful. There are many design principles
-that this article identified, we are mostly interested in the design
-principles related to interaction design. The first interaction design
-principle is to have multiple entry points for interaction. What this
-means for our research, is to consider interaction of both non-dancers
-as well as dancers to have a good experience, which should allow for a
-more inclusive experience. The second point, is to allow for group
-interaction, and also try to, through the installation, facilitate human
-collaborations. This could mean, for the non-dancers, bring people to
-dance together on the floor, and for dancers, allow multiple dancers to
-dance together. The ability for the model to allow for both experienced
-dancers and non-dancers raise a interesting challenge. As we have
-identified many differences in the preferred interaction styles of the
-general public compared to professional dancers. But designing with the
-use of both groups in mind can help bridge the gap and allow for a
-general design. Allow for multiple dancers to interact becomes a
-challenge to the AI model, but there can be ways to average the data
-before or after the information gets passed to the model for inference,
-that can be used to avoid increased training complexity.
-
-% review of RTC, improvisation for professional and non-dancers
-The difference how experienced dancers and non-performers interact
-during a turn-taking excersize is studied by Evola et al. \cite{Evola}. 
-A improvisational performance is used as the framework for the user
-study, where users in a group of 6 can take turns to construct an art
-piece from an assortment of items placed on a table in the centre of the
-stage. The turn-taking sections of the performances are picked out and analyzed.
-One major different identified, between expert performers and the
-non-dancers, were the expert performers did not performing any "communicative
-movement", but rather using observations from their parafoveal and peripheral
-vision to take cues, while the non-performers were seen exchanging gazes to
-communicate. This shows that expert dancers have intuition for
-turn-taking cues, and that non-dancers will require much more explicit cues
-or take longer to initiate a turn-take. This study revealed that expert
-dancers can be a lot more intuitive when interacting during
-an improvisation, while non-dancers will want more explicit cues to tell
-them how they are doing, as well as cues to communicate to them about
-each other's intentions. As discussed, if we want to design an
-installation with multiple entry points, for non-dancers as well as
-professional dancers, the ability for the dance AI agent to interact
-with professionals with trained motion cues, intuition and dance skills,
-as well as the ability for the dance AI agent to interact with
-non-dancers, who will be slower to react to cues, if there are any, and
-require more prompting and reassurance, need to be considered.
+LuminAI is a good example of existing modern co-creative dance agent. In
+a 2019 article, the creators of LuminAI, aka Long et al., analyzed many
+existing co-creative agents in public installations (including LuminAI),
+and identified interaction design principles that creates a better
+interaction experience. There are many design principles that this
+article identified, including technology design and research design, we
+are mostly interested in the design principles related to interaction
+design. The first interaction design principle is to have multiple entry
+points for interaction. What this means for our research, is to consider
+interaction of both non-dancers as well as dancers to have a good
+experience, which should allow for a more inclusive experience. The
+second point, is to allow for group interaction, and also try to,
+through the installation, facilitate human collaborations.  This could
+mean, for the non-dancers, bring people to dance together on the floor,
+and for dancers, allow multiple dancers to dance together.  The ability
+for the model to allow for both experienced dancers and non-dancers
+raise a interesting challenge. As we have identified many differences in
+the preferred interaction styles of the general public compared to
+professional dancers. But designing with the use of both groups in mind
+can help bridge the gap and allow for a general design.  Allow for
+multiple dancers to interact becomes a challenge to the AI model, but
+there can be ways to average the data before or after the information
+gets passed to the model for inference, that can be used to avoid
+increased training complexity.
 
 % review of LuminAI related research, adding leadership state awareness
 Winston and Magerko explored the interactions of non-dancers with the
@@ -142,6 +126,32 @@ model can provide benefits for improved user perception. Tuning the
 agents turn-taking decision making process, and potentially biasing it
 towards humans leading could be done to improve the user experience in
 future works.
+
+
+% review of RTC, improvisation for professional and non-dancers
+The difference how experienced dancers and non-performers interact
+during a turn-taking excersize is studied by Evola et al. \cite{Evola}. 
+A improvisational performance is used as the framework for the user
+study, where users in a group of 6 can take turns to construct an art
+piece from an assortment of items placed on a table in the centre of the
+stage. The turn-taking sections of the performances are picked out and analyzed.
+One major different identified, between expert performers and the
+non-dancers, were the expert performers did not performing any "communicative
+movement", but rather using observations from their parafoveal and peripheral
+vision to take cues, while the non-performers were seen exchanging gazes to
+communicate. This shows that expert dancers have intuition for
+turn-taking cues, and that non-dancers will require much more explicit cues
+or take longer to initiate a turn-take. This study revealed that expert
+dancers can be a lot more intuitive when interacting during
+an improvisation, while non-dancers will want more explicit cues to tell
+them how they are doing, as well as cues to communicate to them about
+each other's intentions. As discussed, if we want to design an
+installation with multiple entry points, for non-dancers as well as
+professional dancers, the ability for the dance AI agent to interact
+with professionals with trained motion cues, intuition and dance skills,
+as well as the ability for the dance AI agent to interact with
+non-dancers, who will be slower to react to cues, if there are any, and
+require more prompting and reassurance, need to be considered.
 
 % analysis of mimicry
 There are some similarities and difference between what Wallace's work
