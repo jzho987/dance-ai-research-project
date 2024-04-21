@@ -170,6 +170,8 @@ well, or use a different interaction framework, and simply have the AI
 try to contribute to the "art piece" (the dance), and use a feedback
 system to know how well it is interacting, and contributing.
 
+% analysis of intuition flow with non-dancers, and what they means for
+% the interaction framework.
 It is, however, crucial to think about how the intuition flow comes into
 play with non-dancers. From Evola et al.'s study, we realized that
 non-dancers were not using a "coordinated communication behaviour". This
@@ -212,6 +214,7 @@ sense), while interaction with the general public could be more on a
 granular level, where certain movements or ways of interactions could be more
 inspiring to facilitate group interaction and get more people to be involved.
  
+% analysis of glitches
 Wallace et al. discussed, how the existence of glitches could positively
 effect the professional dancers, since it gave them new ideas. However,
 the glitching when shown to the general public, could be an issue as
@@ -242,41 +245,74 @@ a generative process, or a evaluation process or a definition process, how does 
 contribute to that process, and how much should the AI contribute
 compared to the human contribution. The exact framework breaks this down
 in a bit more detail, but as an overview, COFI allows us a way to group
-different interaction frameworks and compare them to each other. Rezwana
-and Maher also mentioned that there are two types of co-creative
-processes involving AI, one being a pleasing interaction, and one being
-a provoking interaction. A pleasing interaction would have the AI create
-what the human wants, while a provoking interaction would have the AI
-provide inspiration to the human through "breaking the shared image",
-spoken in the language by Wallace et al. For us to align different
-terminologies used by different authors, we will discuss Human-AI
-interaction using phrases in the COFI framework.
+different interaction frameworks and compare them to each other. After
+proposing the COFI framework, Rezwana and Maher identified and evaluated
+a list of co-creative systems and sorted them using COFI. The results
+highlighted 3 Human-AI co-creative interaction frameworks. The first
+being an agent to follows and complys with human contributions, and
+generate similar contributions. This is a pleasing agent, which can be
+good for extending human's creativity. The opposite of a pleasing agent
+is a provoking agent, but both pleasing and provoking agents play
+important roles in co-creative systems. The second is models that uses
+spontaneous initiative-taking and creates in parallel with users. This
+would align more with the improvisational dance agent. However, the main
+issues with this domain of models is the lack of communication flow from
+the agent to the user, which can negatively impact the quality of
+collaboration and user experience. The thrid cluster of models is an
+advisory and evaluation type of agent, where the agent would provide
+feedback and can refine the user's deisgn. However, this model lacks the
+communication channel from user to the agent. Overall, the three main
+clusters all have their pros and cons, and ensuring good communication
+between the agent and the user would be crucial for a good user
+experience and collaboration quality.
 
-% analysis of wallace with COFI
-The requirements generated from Wallace's work, can be put into the COFI
-framework to solidify interaction desgin when the AI interacts with an
-expert dancer. Intuition flow identifies that there would be no distinct
-communication between the human and the AI, and the communication style
-should all be embodied, and the timing of initiatives should also be
-spontaneous. The dancers from Wallace's workshop identified that the
-person pretending to be the AI, showed little mimicry, and more
-similarity of movement direction and trajectory. This means expert
-dancers would likely expect a non-mimicry style. The rest of the
-framework is filled in from how a improvisational dance would happen.
-Certain points are not very obvious and require further understanding
-and analysis. Task distribution could be viewed as both the human and
-the AI are dancing. But this can also be viewed as one person is
-performing the task of leading, and the other is performing the task of
-following, and since in the article, Rezwana and Maher mentioned how
-performing the same task often requires turn-taking, this shows us that
-we should model the task as being, leader and a follower, and the tasks
-are performed in parallel. For the contribution type, it is challenging
-to pin point to one, since the dancers from Wallace's work mentioned
-that, their partner should both build onto their movements, so extend
-and transform, or that their partner should break the shared image, so
-create new. But the embodied co-creative system should perhaps be
-viewed, not as the movement in the moment, but as the entirety of the
-dance.
+\subsubsection{Analysis}
+% overview of COFI and co-creative interactions
+% The requirements generated from Wallace's work, can be put into the COFI
+% framework to solidify interaction desgin when the AI interacts with an
+% expert dancer. Intuition flow identifies that there would be no distinct
+% communication between the human and the AI, and the communication style
+% should all be embodied, and the timing of initiatives should also be
+% spontaneous. The dancers from Wallace's workshop identified that the
+% person pretending to be the AI, showed little mimicry, and more
+% similarity of movement direction and trajectory. This means expert
+% dancers would likely expect a non-mimicry style. The rest of the
+% framework is filled in from how a improvisational dance would happen.
+% Certain points are not very obvious and require further understanding
+% and analysis. Task distribution could be viewed as both the human and
+% the AI are dancing. But this can also be viewed as one person is
+% performing the task of leading, and the other is performing the task of
+% following, and since in the article, Rezwana and Maher mentioned how
+% performing the same task often requires turn-taking, this shows us that
+% we should model the task as being, leader and a follower, and the tasks
+% are performed in parallel. For the contribution type, it is challenging
+% to pin point to one, since the dancers from Wallace's work mentioned
+% that, their partner should both build onto their movements, so extend
+% and transform, or that their partner should break the shared image, so
+% create new. But the embodied co-creative system should perhaps be
+% viewed, not as the movement in the moment, but as the entirety of the
+% dance.
+
+% analysis of COFI
+The fact that COFI framework specifically looks for the communication
+between human and agent is a way of highlighting the importance of a
+two-way communication during the interaction. This is further discussed
+in the article by Rezwana and Maher, where they mentioned how the
+systems that use a "fluid" mode of interaction often misses out on the
+Agent-To-Human interaction which negatively impacts the interaction. The
+importance of a two-way communication is also discussed by Rezwana and
+Maher in another article \cite{Rezwana2022}, where a user study
+performed demonstrated that adding a communication channel from agent to
+the user can significantly improve user experience and perception to
+the agent, and improve the users' ability to create. However,
+communication in an embodied way is a challenging task in itself, since
+we saw that professional dancers often does not "communicate" but rather
+use their instrinct to work together. This makes creating a meaningful
+Agent-To-Human feedback channel rather challenging. But using other
+means of communications that the user could understand better, like
+visuals, audio, and even text could be attempted to observe the effects.
+This communication channel could also be implemented as a module for
+ease of swapping in and out, for different use cases of the model.
 
 % analysis of differences between professional and non-dancers using
 % COFI
