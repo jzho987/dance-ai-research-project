@@ -69,7 +69,7 @@ jobs:
           rm reports/*.pdf
           git stash apply
           git add -f reports/*.pdf
-          git add -m reports/*.tex
+          git add reports/*.tex
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git commit -m "Build reports (SHA: ${{ github.sha }})" || true
