@@ -14,9 +14,13 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Fetch reports branch
+        run: |
+          git fetch origin reports
+
       - name: Find changed files in reports folder
         run: |
-          git diff --name-only ${{ github.sha }}~1 | grep -E '^reports/.*\.tex$' > reports/changed_files.txt
+          git diff --name-only ${{ github.sha }} reports -- | grep -E '^reports/.*\.tex$' > reports/changed_files.txt
 
       - name: Check if there are any changed files
         run: |
@@ -58,7 +62,6 @@ jobs:
       - name: Stash changes
         run: |
           git stash --all
-          git fetch origin reports
 
       - name: Commit and push
         run: |
@@ -66,6 +69,7 @@ jobs:
           rm reports/*.pdf
           git stash apply
           git add -f reports/*.pdf
+          git add -m reports/*.tex
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git commit -m "Build reports (SHA: ${{ github.sha }})" || true
