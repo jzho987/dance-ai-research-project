@@ -71,7 +71,7 @@ jobs:
           git add -f reports/*.pdf
           while IFS= read -r file; do
             git show origin/main:${{ file }} > ${{ file }}
-          done < "$input_file"
+          done < changed_files.txt
           git add reports/*.tex
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
