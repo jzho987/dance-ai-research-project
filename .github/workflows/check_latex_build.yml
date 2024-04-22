@@ -1,0 +1,59 @@
+# This pipeline is for checking latex build success before pushing to main.
+name: Build Reports
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Fetch reports branch
+        run: |
+          git fetch origin reports
+
+      - name: Find changed files in reports folder
+        run: |
+          output=$(git diff --name-only ${{ github.sha }} reports --)
+          if [ -n  "$output"]; then
+            git diff --name-only ${{ github.sha }} reports -- | grep -E '^reports/.*\.tex$' > reports/changed_files.txt
+          else
+            exit 0
+          fi
+
+      - name: Install latex package
+        run: sudo apt-get install texlive-latex-extra make
+
+      - name: Generate aux
+        run: |
+          cd reports
+          while IFS= read -r file; do
+              pdflatex "$(basename $file)"
+          done < changed_files.txt
+
+      - name: Build bib
+        run: |
+          cd reports
+          while IFS= read -r file; do
+              bibtex "$(basename $file .tex)"
+          done < changed_files.txt
+
+      - name: Use bib
+        run: |
+          cd reports
+          while IFS= read -r file; do
+              pdflatex "$(basename $file)"
+          done < changed_files.txt
+
+      - name: Final latex
+        run: |
+          cd reports
+          while IFS= read -r file; do
+              pdflatex "$(basename $file)"
+          done < changed_files.txt
