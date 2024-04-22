@@ -21,7 +21,7 @@ jobs:
       - name: Find changed files in reports folder
         run: |
           output=$(git diff --name-only ${{ github.sha }} origin/reports)
-          if [ -n  "$output"]; then
+          if [ -n  "$output" ]; then
             echo "$output" | grep -E '^reports/.*\.tex$' > reports/changed_files.txt
           else
             exit 0
