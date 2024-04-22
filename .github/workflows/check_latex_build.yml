@@ -1,5 +1,5 @@
 # This pipeline is for checking latex build success before pushing to main.
-name: Build Reports
+name: Check Latex Build Success
 
 on:
   pull_request:
