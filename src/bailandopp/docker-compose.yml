@@ -1,0 +1,14 @@
+services:
+  bailando:
+    image: pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
+    ports:
+      - "8000:8000"
+    working_dir: /app
+    volumes:
+      - ./app/:/app
+    command:
+      - sh
+      - -c
+      - |
+        pip install -r requirements.txt
+        sanic server --host=0.0.0.0 --port=8000
