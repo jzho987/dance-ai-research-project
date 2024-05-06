@@ -10,10 +10,27 @@ from models.cross_cond_gpt2_music_window_ac import CrossCondGPT2MWAC
 from models.up_down_half_reward import UpDownReward
 
 class Bailando():
-    def __init__(self, vqvae_config, gpt_config, config, device_name):
+    def __init__(self, vqvae_config, gpt_config, config, device_name, vq_ckpt_dir=None, gpt_ckpt_dir=None):
         self.device = torch.device(device_name)
         self.start_epoch = 0
         self._build_model(vqvae_config, gpt_config, config.reward_config, self.device)
+        if vq_ckpt_dir is not None:
+            vqvae = self.vqvae
+            # load VQVAE
+            checkpoint = torch.load(vq_ckpt_dir, map_location=self.device)
+            vqvae.load_state_dict(checkpoint['model'], strict=False)
+            vqvae.eval()
+            self.vqvae = vqvae
+            self.vqvae_loaded = True
+        if gpt_ckpt_dir is not None:
+            gpt = self.gpt
+            # load gpt
+            checkpoint = torch.load(gpt_ckpt_dir, map_location=self.device)
+            gpt.load_state_dict(checkpoint['model'])
+            gpt.eval()
+            self.gpt = gpt
+            self.gpt_loaded = True
+
         # self._build_optimizer(config)
 
     # Run evaluation on adhoc batch size = 1 data, and visualize to video. Wrapper for eval raw.
@@ -26,19 +43,21 @@ class Bailando():
         # visualizeAndWrite([results], self.config, self.evaldir, [dance_name], self.config.testing.ckpt_epoch, quants_map, device=self.device)
 
     # Run evaluation on adhoc batch size = 1 data. Return output from inference.
-    def eval_raw(self, music_input, dance_input, vq_ckpt_dir, gpt_ckpt_dir, music_config):
+    def eval_raw(self, music_input, dance_input, music_config, vq_ckpt_dir=None, gpt_ckpt_dir=None):
        with torch.no_grad():
             vqvae = self.vqvae
             gpt = self.gpt
 
             # load VQVAE
-            checkpoint = torch.load(vq_ckpt_dir, map_location=self.device)
-            vqvae.load_state_dict(checkpoint['model'], strict=False)
-            vqvae.eval()
+            if self.vqvae_loaded is not True:
+                checkpoint = torch.load(vq_ckpt_dir, map_location=self.device)
+                vqvae.load_state_dict(checkpoint['model'], strict=False)
+                vqvae.eval()
             # load gpt
-            checkpoint = torch.load(gpt_ckpt_dir, map_location=self.device)
-            gpt.load_state_dict(checkpoint['model'])
-            gpt.eval()
+            if self.gpt_loaded is not True:
+                checkpoint = torch.load(gpt_ckpt_dir, map_location=self.device)
+                gpt.load_state_dict(checkpoint['model'])
+                gpt.eval()
 
             return self.eval_single_epoch(vqvae, gpt, music_config, music_input, dance_input, 10)
 

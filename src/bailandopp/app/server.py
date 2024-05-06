@@ -25,7 +25,7 @@ async def boostrap(app, loop):
     print(">init boostrap")
     device = "gpu" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     print(f"use device: {device}")
-    app.ctx.agent = Bailando(vq_cf, gpt_cf, cf, device)
+    app.ctx.agent = Bailando(vq_cf, gpt_cf, cf, device, "./weight/vqvae.pt", "./weight/gpt.pt")
     app.ctx.cache = {"hello": "world"}
     print(">finished boostrap")
 
@@ -39,12 +39,19 @@ async def send_music(request):
     await handle_send_music(music_id=musicID, payload=payload)
     return HTTPResponse(status=200)
 
-@app.websocket("/socket")
-async def handler(request, ws):
-    while True:
-        message = await ws.recv()
-        print(message)
-        await ws.send(message)
+# routes
+@app.post("/dance-sequence")
+async def generate_dance_sequence(request):
+    print("received generate dance sequence request")
+    request = EasyDict(request.json)
+    musicID = request.musicID
+    payload = request.payload
+    length = request.length # how long of a clip to generate
+    data: torch.Tensor = await handle_generate_dance_sequence(music_id=musicID, payload=payload, length=length)
+    data = data.squeeze(0).cpu().numpy().tolist()
+    response = {'dance': data}
+    response = json.dumps(response)
+    return HTTPResponse(body=response, status=200)
 
 # handlers
 async def handle_send_music(music_id, payload):
@@ -92,3 +99,12 @@ async def handle_send_music(music_id, payload):
 
     # post
     os.remove(file_name)
+
+async def handle_generate_dance_sequence(music_id, payload, length):
+    print("handling generate dance sequence request")
+    agent: Bailando = app.ctx.agent
+    cache = app.ctx.cache
+    music_input = torch.tensor(cache[f'{music_id}-processed']).unsqueeze(0)
+    dance_input = torch.tensor(payload).unsqueeze(0)
+    result, quants = agent.eval_raw(music_input, dance_input, cf.music_config)
+    return result
