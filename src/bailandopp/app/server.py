@@ -106,5 +106,5 @@ async def handle_generate_dance_sequence(music_id, payload, length):
     cache = app.ctx.cache
     music_input = torch.tensor(cache[f'{music_id}-processed']).unsqueeze(0)
     dance_input = torch.tensor(payload).unsqueeze(0)
-    result, quants = agent.eval_raw(music_input, dance_input, cf.music_config)
+    result, quants = agent.eval_raw(music_input, dance_input, cf.music_config, length)
     return result

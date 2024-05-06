@@ -15,6 +15,10 @@ type generate_payload struct {
 	Payload [][]float32 `json:"payload"`
 }
 
+type result_payload struct {
+	Dance [][]float32 `json:"dance"`
+}
+
 func main() {
 	url := "http://localhost:8000/dance-sequence"
 
@@ -31,7 +35,7 @@ func main() {
 	}
 	payload := generate_payload{
 		MusicID: "music_id",
-		Length:  0,
+		Length:  20,
 		Payload: result,
 	}
 	data, err := json.Marshal(payload)
@@ -65,6 +69,13 @@ func main() {
 		print("failed to read all")
 		panic(err)
 	}
+	resultPayload := result_payload{}
+	err = json.Unmarshal(data, &resultPayload)
+	if err != nil {
+		print("failed to unmarshal result")
+		panic(err)
+	}
+
 	println(response.Status)
-	println(string(data))
+	println(len(resultPayload.Dance))
 }

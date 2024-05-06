@@ -43,7 +43,7 @@ class Bailando():
         # visualizeAndWrite([results], self.config, self.evaldir, [dance_name], self.config.testing.ckpt_epoch, quants_map, device=self.device)
 
     # Run evaluation on adhoc batch size = 1 data. Return output from inference.
-    def eval_raw(self, music_input, dance_input, music_config, vq_ckpt_dir=None, gpt_ckpt_dir=None):
+    def eval_raw(self, music_input, dance_input, music_config, length, vq_ckpt_dir=None, gpt_ckpt_dir=None):
        with torch.no_grad():
             vqvae = self.vqvae
             gpt = self.gpt
@@ -59,9 +59,9 @@ class Bailando():
                 gpt.load_state_dict(checkpoint['model'])
                 gpt.eval()
 
-            return self.eval_single_epoch(vqvae, gpt, music_config, music_input, dance_input, 10)
+            return self.eval_single_epoch(vqvae, gpt, music_config, music_input, dance_input, 10, length)
 
-    def eval_single_epoch(self, vqvae, gpt, music_config, music_seq:torch.Tensor, pose_seq:torch.Tensor=None, shift=0):
+    def eval_single_epoch(self, vqvae, gpt, music_config, music_seq:torch.Tensor, pose_seq:torch.Tensor=None, shift=0, length=None):
         # mps does not support float 64, so we cast to float32
         if self.device == torch.device('mps'):
             music_seq = music_seq.type(torch.float32)
@@ -87,7 +87,7 @@ class Bailando():
         music_seq = music_seq.view(b, t//music_ds_rate, c*music_ds_rate)
         music_seq = music_seq[:, music_ds_rate//music_relative_rate:]
 
-        zs = gpt.module.sample(x, cond=music_seq, shift=shift)
+        zs = gpt.module.sample(x, cond=music_seq, shift=shift, length=length)
         pose_sample = vqvae.module.decode(zs)
 
         # NOTE: previously this was checking if the global_vel value was true, and only then, do we run the below block.

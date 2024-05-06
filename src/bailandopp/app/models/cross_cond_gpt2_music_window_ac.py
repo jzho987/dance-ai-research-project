@@ -182,7 +182,7 @@ class CrossCondGPT2MWAC(nn.Module):
     # def sample(self, xs, cond):
     #     x_up, x_down = xs
     #     return (self.up_half_gpt.sample(x_up, cond), self.down_half_gpt.sample(x_down, cond))
-    def sample(self, xs, cond, shift=None):
+    def sample(self, xs, cond, shift=None, length=None):
         
         block_size = self.get_block_size() - 1
         block_shift = block_size
@@ -196,7 +196,13 @@ class CrossCondGPT2MWAC(nn.Module):
         x_up = x_up[:,:shift]
         x_down = x_down[:,:shift]
 
-        for k in range(shift - 1, cond.size(1) // music_sample_rate - padding_size * 2):
+        music_length = cond.size(1) // music_sample_rate - padding_size * 2
+        if length is None:
+            length = music_length
+        else:
+            length = min(music_length, length)
+
+        for k in range(shift - 1, length):
             start_index = max(0, k + 1 - block_size)
             end_index = min(x_up.size(1), k + 1)
 
