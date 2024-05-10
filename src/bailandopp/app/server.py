@@ -45,9 +45,10 @@ async def generate_dance_sequence(request):
     print("received generate dance sequence request")
     request = EasyDict(request.json)
     musicID = request.musicID
+    startFrameIndex = request.startFrameIndex
     payload = request.payload
     length = request.length # how long of a clip to generate
-    data: torch.Tensor = await handle_generate_dance_sequence(music_id=musicID, payload=payload, length=length)
+    data: torch.Tensor = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length)
     data = data.squeeze(0).cpu().numpy().tolist()
     response = {'dance': data}
     response = json.dumps(response)
@@ -100,11 +101,11 @@ async def handle_send_music(music_id, payload):
     # post
     os.remove(file_name)
 
-async def handle_generate_dance_sequence(music_id, payload, length):
+async def handle_generate_dance_sequence(music_id, start_frame_index, payload, length):
     print("handling generate dance sequence request")
     agent: Bailando = app.ctx.agent
     cache = app.ctx.cache
     music_input = torch.tensor(cache[f'{music_id}-processed']).unsqueeze(0)
     dance_input = torch.tensor(payload).unsqueeze(0)
-    result, quants = agent.eval_raw(music_input, dance_input, cf.music_config, length)
+    result, quants = agent.eval_raw(music_input, dance_input, cf.music_config, length, start_frame_index)
     return result

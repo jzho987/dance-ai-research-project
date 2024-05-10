@@ -179,10 +179,8 @@ class CrossCondGPT2MWAC(nn.Module):
     #         module.weight.data.fill_(1.0)
     def get_block_size(self):
         return self.block_size
-    # def sample(self, xs, cond):
-    #     x_up, x_down = xs
-    #     return (self.up_half_gpt.sample(x_up, cond), self.down_half_gpt.sample(x_down, cond))
-    def sample(self, xs, cond, shift=None, length=None):
+    
+    def sample(self, xs, cond, shift=None, length=None, start_frame_index=0):
         
         block_size = self.get_block_size() - 1
         block_shift = block_size
@@ -205,10 +203,13 @@ class CrossCondGPT2MWAC(nn.Module):
         for k in range(shift - 1, length):
             start_index = max(0, k + 1 - block_size)
             end_index = min(x_up.size(1), k + 1)
-
             x_cond_upper = x_up[:,start_index:end_index]
             x_cond_lower = x_down[:,start_index:end_index]
-            cond_input = cond[:, :(k + 1 + padding_size * 2) * music_sample_rate] if k < block_size  else cond[:, (k + 1) * music_sample_rate - (block_shift+(k-block_size-1)%(block_size-block_shift+1)) * music_sample_rate : (k + 1 + padding_size * 2) * music_sample_rate]
+
+            music_k = k + start_frame_index
+            music_start_index = (music_k + 1 - block_shift) * music_sample_rate if music_k >= block_size else 0
+            music_end_index = min(cond.size(1) - 1, (music_k + 1 + padding_size * 2) * music_sample_rate)
+            cond_input = cond[:, music_start_index: music_end_index]
 
             logits, _ = self.forward((x_cond_upper, x_cond_lower), cond_input)
             logit_up, logit_down = logits

@@ -10,9 +10,10 @@ import (
 )
 
 type generate_payload struct {
-	MusicID string      `json:"musicID"`
-	Length  int         `json:"length"`
-	Payload [][]float32 `json:"payload"`
+	MusicID         string      `json:"musicID"`
+	StartFrameIndex int         `json:"startFrameIndex"`
+	Length          int         `json:"length"`
+	Payload         [][]float32 `json:"payload"`
 }
 
 type result_payload struct {
@@ -34,9 +35,10 @@ func main() {
 		panic(err)
 	}
 	payload := generate_payload{
-		MusicID: "music_id",
-		Length:  20,
-		Payload: result,
+		MusicID:         "music_id",
+		Length:          20,
+		StartFrameIndex: 10,
+		Payload:         result,
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {

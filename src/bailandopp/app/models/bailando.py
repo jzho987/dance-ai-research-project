@@ -22,6 +22,9 @@ class Bailando():
             vqvae.eval()
             self.vqvae = vqvae
             self.vqvae_loaded = True
+        else:
+            self.vqvae_loaded = False
+            
         if gpt_ckpt_dir is not None:
             gpt = self.gpt
             # load gpt
@@ -30,20 +33,22 @@ class Bailando():
             gpt.eval()
             self.gpt = gpt
             self.gpt_loaded = True
+        else:
+            self.gpt_loaded = False
 
         # self._build_optimizer(config)
 
     # Run evaluation on adhoc batch size = 1 data, and visualize to video. Wrapper for eval raw.
     def eval_raw_visualize(self, music_input, dance_input, dance_name, vq_ckpt_dir, gpt_ckpt_dir, music_config):
         music_input, dance_input = torch.tensor(music_input).unsqueeze(0), torch.tensor(dance_input).unsqueeze(0)
-        results, quants = self.eval_raw(music_input, dance_input, vq_ckpt_dir, gpt_ckpt_dir, music_config)
+        results, quants = self.eval_raw(music_input, dance_input, music_config, 100, 0, vq_ckpt_dir, gpt_ckpt_dir)
         quants_map = {}
         quants_map[dance_name] = quants
         print("DONE")
         # visualizeAndWrite([results], self.config, self.evaldir, [dance_name], self.config.testing.ckpt_epoch, quants_map, device=self.device)
 
     # Run evaluation on adhoc batch size = 1 data. Return output from inference.
-    def eval_raw(self, music_input, dance_input, music_config, length, vq_ckpt_dir=None, gpt_ckpt_dir=None):
+    def eval_raw(self, music_input, dance_input, music_config, length, start_frame_index, vq_ckpt_dir=None, gpt_ckpt_dir=None):
        with torch.no_grad():
             vqvae = self.vqvae
             gpt = self.gpt
@@ -59,9 +64,9 @@ class Bailando():
                 gpt.load_state_dict(checkpoint['model'])
                 gpt.eval()
 
-            return self.eval_single_epoch(vqvae, gpt, music_config, music_input, dance_input, 10, length)
+            return self.eval_single_epoch(vqvae, gpt, music_config, music_input, dance_input, 10, length, start_frame_index)
 
-    def eval_single_epoch(self, vqvae, gpt, music_config, music_seq:torch.Tensor, pose_seq:torch.Tensor=None, shift=0, length=None):
+    def eval_single_epoch(self, vqvae, gpt, music_config, music_seq:torch.Tensor, pose_seq:torch.Tensor=None, shift=0, length=None, start_frame_index=0):
         # mps does not support float 64, so we cast to float32
         if self.device == torch.device('mps'):
             music_seq = music_seq.type(torch.float32)
