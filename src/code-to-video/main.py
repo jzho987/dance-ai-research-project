@@ -298,10 +298,10 @@ def visualizeAndWrite(result, quant, model_path, output_dir, music_path):
     img_to_video_with_audio(TMP_DIR_IMAGE, output_dir, music_path)
 
     # clean up temp folder
-    # if os.path.exists(TMP_DIR_JSON):
-    #     shutil.rmtree(TMP_DIR_JSON)
-    # if os.path.exists(TMP_DIR_IMAGE):
-    #     shutil.rmtree(TMP_DIR_IMAGE)
+    if os.path.exists(TMP_DIR_JSON):
+        shutil.rmtree(TMP_DIR_JSON)
+    if os.path.exists(TMP_DIR_IMAGE):
+        shutil.rmtree(TMP_DIR_IMAGE)
 
 if __name__ == "__main__":
     with open("./results.json") as f:
