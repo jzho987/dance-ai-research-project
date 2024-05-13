@@ -1,4 +1,4 @@
-package main
+package test_send_music
 
 import (
 	"bytes"
@@ -15,13 +15,13 @@ type music_payload struct {
 	Payload string `json:"payload"`
 }
 
-func main() {
+func Send_music_request() error {
 	url := "http://localhost:8000/music"
 
-	file, err := os.ReadFile("../data/mBR0.wav")
+	file, err := os.ReadFile("data/mBR0.wav")
 	if err != nil {
 		print("failed to read file")
-		panic(err)
+		return err
 	}
 	payloadString := base64.StdEncoding.EncodeToString(file)
 	payload := music_payload{
@@ -31,13 +31,13 @@ func main() {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		print("failed to marshal json")
-		panic(err)
+		return err
 	}
 
 	sendMusicRequest, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	if err != nil {
 		print("failed to create http request")
-		panic(err)
+		return err
 	}
 	sendMusicRequest.Header.Set("Content-type", "application/json")
 
@@ -51,14 +51,14 @@ func main() {
 	response, err := client.Do(sendMusicRequest)
 	if err != nil {
 		print("failed to do http request")
-		panic(err)
+		return err
 	}
 
 	data, err = io.ReadAll(response.Body)
 	if err != nil {
 		print("failed to read all")
-		panic(err)
+		return err
 	}
-	println(response.Status)
-	println(string(data))
+
+	return nil
 }
