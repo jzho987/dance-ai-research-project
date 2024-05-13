@@ -312,6 +312,6 @@ if __name__ == "__main__":
     # temp vars
     model_path = "./SMPL_MALE.pkl"
     output_path = "./"
-    music_path = f"./music.mp3"
+    music_path = "./music.wav"
 
     visualizeAndWrite(result, quant, model_path, output_path, music_path)

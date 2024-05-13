@@ -48,9 +48,16 @@ async def generate_dance_sequence(request):
     startFrameIndex = request.startFrameIndex
     payload = request.payload
     length = request.length # how long of a clip to generate
-    data: torch.Tensor = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length)
-    data = data.squeeze(0).cpu().numpy().tolist()
-    response = {'dance': data}
+
+    result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length)
+    result = result.squeeze(0).cpu().numpy().tolist()
+    quant_up, quant_down = quant
+    quant = [quant_up.tolist(), quant_down.tolist()]
+
+    response = {
+        'result': result,
+        'quant': quant
+    }
     response = json.dumps(response)
     return HTTPResponse(body=response, status=200)
 
@@ -108,4 +115,4 @@ async def handle_generate_dance_sequence(music_id, start_frame_index, payload, l
     music_input = torch.tensor(cache[f'{music_id}-processed']).unsqueeze(0)
     dance_input = torch.tensor(payload).unsqueeze(0)
     result, quants = agent.eval_raw(music_input, dance_input, cf.music_config, length, start_frame_index)
-    return result
+    return result, quants
