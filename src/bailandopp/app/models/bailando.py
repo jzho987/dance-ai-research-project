@@ -1,9 +1,8 @@
-import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import itertools
-import models
+import numpy as np
 
 from models.sep_vqvae_root_mix import SepVQVAERmix
 from models.cross_cond_gpt2_music_window_ac import CrossCondGPT2MWAC
@@ -48,7 +47,7 @@ class Bailando():
         # visualizeAndWrite([results], self.config, self.evaldir, [dance_name], self.config.testing.ckpt_epoch, quants_map, device=self.device)
 
     # Run evaluation on adhoc batch size = 1 data. Return output from inference.
-    def eval_raw(self, music_input, dance_input, music_config, length, start_frame_index, vq_ckpt_dir=None, gpt_ckpt_dir=None):
+    def eval_raw(self, music_input, dance_input, music_config, length, start_frame_index, shift, vq_ckpt_dir=None, gpt_ckpt_dir=None):
        with torch.no_grad():
             vqvae = self.vqvae
             gpt = self.gpt
@@ -57,14 +56,33 @@ class Bailando():
             if self.vqvae_loaded is not True:
                 checkpoint = torch.load(vq_ckpt_dir, map_location=self.device)
                 vqvae.load_state_dict(checkpoint['model'], strict=False)
-                vqvae.eval()
+                vqvae = vqvae.eval()
             # load gpt
             if self.gpt_loaded is not True:
                 checkpoint = torch.load(gpt_ckpt_dir, map_location=self.device)
                 gpt.load_state_dict(checkpoint['model'])
-                gpt.eval()
+                gpt = gpt.eval()
 
-            return self.eval_single_epoch(vqvae, gpt, music_config, music_input, dance_input, 10, length, start_frame_index)
+            return self.eval_single_epoch(vqvae, gpt, music_config, music_input, dance_input, shift, length, start_frame_index)
+    
+    def encode(self, x):
+        with torch.no_grad():
+            vqvae = self.vqvae
+            return vqvae.module.encode(x)
+        
+    def decode(self, up, down):
+        with torch.no_grad():
+            vqvae = self.vqvae
+            pose_sample = vqvae.module.decode((up, down))
+            print(pose_sample.shape)
+
+            # NOTE: previously this was checking if the global_vel value was true, and only then, do we run the below block.
+            global_vel = pose_sample[:, :, :3].clone()
+            pose_sample[:, 0, :3] = 0
+            for iii in range(1, pose_sample.size(1)):
+                pose_sample[:, iii, :3] = pose_sample[:, iii-1, :3] + global_vel[:, iii-1, :]
+
+            return pose_sample
 
     def eval_single_epoch(self, vqvae, gpt, music_config, music_seq:torch.Tensor, pose_seq:torch.Tensor=None, shift=0, length=None, start_frame_index=0):
         # mps does not support float 64, so we cast to float32

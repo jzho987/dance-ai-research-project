@@ -1,5 +1,7 @@
 reward_config = {"rate": 0}
 optimizer_type = "Adam"
+wav_padding = 5
+move = 5
 optimizer_kwargs = {
     "lr": 0.00001,
     "betas": [0.5, 0.999],

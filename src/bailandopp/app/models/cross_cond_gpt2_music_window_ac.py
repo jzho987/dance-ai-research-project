@@ -181,7 +181,8 @@ class CrossCondGPT2MWAC(nn.Module):
         return self.block_size
     
     def sample(self, xs, cond, shift=None, length=None, start_frame_index=0):
-        
+        print(f"generating length: {length}, shift is: {shift}, start frame: {start_frame_index}")
+
         block_size = self.get_block_size() - 1
         block_shift = block_size
         music_sample_rate = self.music_sample_size

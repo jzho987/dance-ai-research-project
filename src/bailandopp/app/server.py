@@ -23,7 +23,7 @@ app = Sanic("ai_agent_server")
 @app.before_server_start
 async def boostrap(app, loop):
     print(">init boostrap")
-    device = "gpu" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     print(f"use device: {device}")
     app.ctx.agent = Bailando(vq_cf, gpt_cf, cf, device, "./weight/vqvae.pt", "./weight/gpt.pt")
     app.ctx.cache = {"hello": "world"}
@@ -48,8 +48,11 @@ async def generate_dance_sequence(request):
     startFrameIndex = request.startFrameIndex
     payload = request.payload
     length = request.length # how long of a clip to generate
+    shift = request.shift # amount of user input to generate from
 
-    result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length)
+    result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length, shift=shift)
+    # with open("bailando_app.json", "w") as f:
+    #     f.write(json.dumps(result.data.cpu().numpy().tolist()))
     result = result.squeeze(0).cpu().numpy().tolist()
     quant_up, quant_down = quant
     quant = [quant_up.tolist(), quant_down.tolist()]
@@ -102,17 +105,47 @@ async def handle_send_music(music_id, payload):
         tempogram
     ], axis=0)
     feature = feature.transpose(1, 0)
+
+    wav_padding = cf.wav_padding
+    music_move = cf.move
+    np_music = np.array(feature)
+
+    # IMPORTANT tranformation before store
+    # zero padding left
+    for kk in range(wav_padding):
+        np_music = np.append(np.zeros_like(np_music[-1:]), np_music, axis=0)
+    # fully devisable
+    for kk in range((len(np_music) // music_move + 1) * music_move - len(np_music) ):
+        np_music = np.append(np_music, np_music[-1:], axis=0)
+    # zero padding right
+    for kk in range(wav_padding):
+        np_music = np.append(np_music, np.zeros_like(np_music[-1:]), axis=0)
+    feature = np_music
+    # # test
+    # with open("output_music.json", "w") as f:
+    #     print(feature)
+    #     f.write(json.dumps(feature.tolist()))
+
     key = f'{music_id}-processed'
     app.ctx.cache[key] = feature
 
     # post
     os.remove(file_name)
 
-async def handle_generate_dance_sequence(music_id, start_frame_index, payload, length):
+async def handle_generate_dance_sequence(music_id, start_frame_index, payload, length, shift):
     print("handling generate dance sequence request")
     agent: Bailando = app.ctx.agent
     cache = app.ctx.cache
     music_input = torch.tensor(cache[f'{music_id}-processed']).unsqueeze(0)
-    dance_input = torch.tensor(payload).unsqueeze(0)
-    result, quants = agent.eval_raw(music_input, dance_input, cf.music_config, length, start_frame_index)
+
+    # transform
+    np_dance = np.array(payload)
+    root = np_dance[:, :3]
+    np_dance = np_dance - np.tile(root, (1, 24))
+    np_dance[:, :3] = root
+    for kk in range((len(np_dance) // 5 + 1) * 5 - len(np_dance) ):
+        np_dance = np.append(np_dance, np_dance[-1:], axis=0)
+    dance_input = torch.tensor(np_dance).unsqueeze(0)
+
+    result, quants = agent.eval_raw(music_input, dance_input, cf.music_config, length, start_frame_index, shift)
     return result, quants

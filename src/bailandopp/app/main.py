@@ -6,6 +6,7 @@ from pprint import pprint
 from easydict import EasyDict
 import json
 import numpy as np
+import torch
 
 import config.config as cf
 import config.gpt_config as gpt_cf
@@ -16,10 +17,15 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Pytorch implementation of Music2Dance"
     )
-    parser.add_argument("--config", default="")
     parser.add_argument("--data_dir")
     parser.add_argument("--music_name")
     parser.add_argument("--weight_dir")
+    parser.add_argument("--input_dir")
+    parser.add_argument("--output_dir")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--eval", action='store_true')
+    group.add_argument("--decode", action='store_true')
+    group.add_argument("--endec", action='store_true')
 
     return parser.parse_args()
 
@@ -37,11 +43,33 @@ def eval(agent: Bailando, args):
     assert music.all() != None, "music data is empty"
     assert dance.all() != None, "dance data is empty"
 
-    vq_ckpt_dir = os.path.join(args.weight_dir, "vqvae.pt")
-    gpt_ckpt_dir = os.path.join(args.weight_dir, "gpt.pt")
-    agent.eval_raw_visualize(
-        music, dance, args.music_name, vq_ckpt_dir, gpt_ckpt_dir, cf.music_config
+    result, quant = agent.eval_raw(
+        torch.tensor(music).unsqueeze(0), torch.tensor(dance).unsqueeze(0), cf.music_config, 55, 0
     )
+    result = result.squeeze(0).cpu().numpy().tolist()
+    quant_up, quant_down = quant
+    quant = [quant_up.tolist(), quant_down.tolist()]
+    json_dict = {'result': result, 'quant': quant}
+    with open("results.json", "w") as f:
+        f.write(json.dumps(json_dict))
+
+def decode(agent: Bailando, json_path, out_path):
+    with open(json_path) as f:
+        json_obj = json.loads(f.read())
+        up, down = json_obj['up'], json_obj['down']
+    out = agent.decode(up, down).cpu().numpy().tolist()
+    with open(out_path, "w") as f:
+        f.write(json.dumps(out))
+
+
+def endec(agent: Bailando, json_path, out_path):
+    with open(json_path) as f:
+        json_obj = json.loads(f.read())
+    input = torch.tensor(json_obj).unsqueeze(0).cuda()
+    up, down = agent.encode(input)
+    out = agent.decode(up, down).cpu().numpy().tolist()
+    with open(out_path, "w") as f:
+        f.write(json.dumps(out))
 
 
 def main():
@@ -49,10 +77,15 @@ def main():
     args = parse_args()
 
     # build agent
-    agent = Bailando(vq_cf, gpt_cf, cf, "mps")
+    agent = Bailando(vq_cf, gpt_cf, cf, "cuda", vq_ckpt_dir="./weight/vqvae.pt", gpt_ckpt_dir="./weight/gpt.pt")
 
     # start eval
-    eval(agent, args)
+    if args.eval:
+        eval(agent, args)
+    if args.decode:
+        decode(agent, args.input_dir, args.output_dir)
+    if args.endec:
+        endec(agent, args.input_dir, args.output_dir)
 
 
 if __name__ == "__main__":
