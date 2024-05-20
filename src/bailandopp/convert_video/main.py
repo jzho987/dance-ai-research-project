@@ -11,6 +11,7 @@ from easydict import EasyDict
 from scipy.spatial.transform import Rotation as R
 import os
 import shutil
+import argparse
 
 from keypoint2img import read_keypoints
 
@@ -172,7 +173,7 @@ def to_json(dance, output_dir, width, height, ):
             f.write(frame_json)
 
 
-def visualize_json(fname_iter, dance_path, output_path, quant, width, height):
+def visualize_json(fname_iter, dance_path, output_path, width, height):
     j, fname = fname_iter
     json_file = os.path.join(dance_path, fname)
     img = Image.fromarray(read_keypoints(json_file, (width, height),
@@ -185,70 +186,32 @@ def visualize_json(fname_iter, dance_path, output_path, quant, width, height):
     img.save(os.path.join(output_path, f'frame{j:06d}.png'))
 
 
-def json_to_img(input_dir, output_dir, quant, width, height, worker_num=16):
+def json_to_img(input_dir, output_dir, width, height, worker_num=16):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    quant_list = None
     fnames = sorted(os.listdir(input_dir))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    if isinstance(quant, tuple):
-        quant_lists = []
-        for q in quant:   
-            downsample_rate = max(len(fnames) // len(q), 1)
-            quant_lists.append(q.repeat(downsample_rate).tolist())
-        quant_list = [tuple(qlist[ii] for qlist in quant_lists) for ii in range(len(quant_lists[0]))]
-    else:                
-        downsample_rate = max(len(fnames) // len(quant), 1)
-        quant_list = np.array(quant).repeat(downsample_rate).tolist()
-    quant_list.append(quant_list[-1])        
 
     # Visualize json in parallel
     pool = Pool(worker_num)
-    partial_func = partial(visualize_json, dance_path=input_dir, output_path=output_dir, quant=quant_list, width=width, height=height)
+    partial_func = partial(visualize_json, dance_path=input_dir, output_path=output_dir, width=width, height=height)
     pool.map(partial_func, enumerate(fnames))
     pool.close()
     pool.join()
 
 
-def visualizeAndWrite(result, quant, model_path, output_dir, music_path):
-    smpl = SMPL(model_path=model_path, gender='MALE', batch_size=1)
-    np_dances_original = []
-    dance_datas = []
-    np_dances_rotmat = []
-
-    # original loop data
+def visualizeAndWrite(np_dance, output_dir, music_path):
     np_dance = np.array(result)
-    np_dances_rotmat.append(np_dance)
-    root = np_dance[:, :3]
-    rotmat = np_dance[:, 3:].reshape([-1, 3, 3])
-
-    rotmat = get_closest_rotmat(rotmat)
-    smpl_poses = rotmat2aa(rotmat).reshape(-1, 24, 3)
-    np_dance = smpl.forward(
-        global_orient=torch.from_numpy(smpl_poses[:, 0:1]).float(),
-        body_pose=torch.from_numpy(smpl_poses[:, 1:]).float(),
-        transl=torch.from_numpy(root).float(),
-    ).joints.detach().numpy()[:, 0:24, :]
-    b = np_dance.shape[0]
-    np_dance = np_dance.reshape(b, -1)
-    dance_datas.append(np_dance)
-
-    nn, cc = np_dance.shape
-    np_dance = np_dance.reshape((nn, cc//3, 3))
-    roott = np_dance[:1, :1]  # the root
-    np_dance = (np_dance - roott).reshape((nn, cc))
-    
-    root = np_dance[:, :3]
-    np_dance[:, :3] = root
-    np_dances_original.append(np_dance)
 
     b, c = np_dance.shape
     np_dance = np_dance.reshape([b, c//3, 3])
     np_dance2 = np_dance[:, :, :2] / 1.5
     np_dance2[:, :, 0] /= 2.2
     np_dance_trans = np.zeros([b, 25, 2]).copy()
+    if pregen:
+        np_dance2[:, :, 1] = np_dance2[:, :, 1] - 1
     
     # head
     np_dance_trans[:, 0] = np_dance2[:, 12]
@@ -294,7 +257,7 @@ def visualizeAndWrite(result, quant, model_path, output_dir, music_path):
     # end of loop
 
     to_json(np_dance_result, TMP_DIR_JSON, width=960, height=540)
-    json_to_img(TMP_DIR_JSON, TMP_DIR_IMAGE, quant, width=960, height=540)
+    json_to_img(TMP_DIR_JSON, TMP_DIR_IMAGE, width=960, height=540)
     img_to_video_with_audio(TMP_DIR_IMAGE, output_dir, music_path)
 
     # clean up temp folder
@@ -303,15 +266,73 @@ def visualizeAndWrite(result, quant, model_path, output_dir, music_path):
     if os.path.exists(TMP_DIR_IMAGE):
         shutil.rmtree(TMP_DIR_IMAGE)
 
-if __name__ == "__main__":
-    with open("./results.json") as f:
+def process_generated(file, model_path):
+    with open(file) as f:
         json_obj = json.loads(f.read())
         dict = EasyDict(json_obj)
         result, quant = dict.result, dict.quant
+        # result = json_obj
+    smpl = SMPL(model_path=model_path, gender='MALE', batch_size=1)
+    np_dances_original = []
+    dance_datas = []
+    np_dances_rotmat = []
+
+    # original loop data
+    np_dance = np.array(result)
+    np_dances_rotmat.append(np_dance)
+    root = np_dance[:, :3]
+    rotmat = np_dance[:, 3:].reshape([-1, 3, 3])
+
+    rotmat = get_closest_rotmat(rotmat)
+    smpl_poses = rotmat2aa(rotmat).reshape(-1, 24, 3)
+    np_dance = smpl.forward(
+        global_orient=torch.from_numpy(smpl_poses[:, 0:1]).float(),
+        body_pose=torch.from_numpy(smpl_poses[:, 1:]).float(),
+        transl=torch.from_numpy(root).float(),
+    ).joints.detach().numpy()[:, 0:24, :]
+    b = np_dance.shape[0]
+    np_dance = np_dance.reshape(b, -1)
+    dance_datas.append(np_dance)
+
+    nn, cc = np_dance.shape
+    np_dance = np_dance.reshape((nn, cc//3, 3))
+    roott = np_dance[:1, :1]  # the root
+    np_dance = (np_dance - roott).reshape((nn, cc))
     
+    root = np_dance[:, :3]
+    np_dance[:, :3] = root
+    np_dances_original.append(np_dance)
+    return np_dance
+
+
+def process_pregen(file):
+    with open(file) as f:
+        json_obj = json.loads(f.read())
+        result = json_obj['dance_array']
+    np_dance = np.array(result)
+    return np_dance
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Pytorch implementation of Music2Dance"
+    )
+    parser.add_argument("--file", default='results.json')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--pre", action='store_true') # generate video with simple processed smpl data
+    group.add_argument("--pose", action='store_true') # generate video with generated data from the model
+    args = parser.parse_args()
+
     # temp vars
     model_path = "./SMPL_MALE.pkl"
     output_path = "./"
     music_path = "./music.wav"
+    
+    if args.pre:
+        pregen = False
+        result = process_generated(args.file, model_path)
+    elif args.post:
+        pregen = True
+        result = process_pregen(args.file)
 
-    visualizeAndWrite(result, quant, model_path, output_path, music_path)
+    visualizeAndWrite(result, output_path, music_path)

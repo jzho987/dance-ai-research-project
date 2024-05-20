@@ -54,7 +54,7 @@ func Send_music_request() error {
 		return err
 	}
 
-	data, err = io.ReadAll(response.Body)
+	_, err = io.ReadAll(response.Body)
 	if err != nil {
 		print("failed to read all")
 		return err

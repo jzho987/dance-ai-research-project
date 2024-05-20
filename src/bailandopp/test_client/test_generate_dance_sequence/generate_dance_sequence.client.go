@@ -13,6 +13,7 @@ type generate_payload struct {
 	MusicID         string      `json:"musicID"`
 	StartFrameIndex int         `json:"startFrameIndex"`
 	Length          int         `json:"length"`
+	Shift           int         `json:"shift"`
 	Payload         [][]float32 `json:"payload"`
 }
 
@@ -21,7 +22,7 @@ type Result_payload struct {
 	Quant  [][]float32 `json:"quant"`
 }
 
-func Generate_dance_sequence_request(length int) (*Result_payload, error) {
+func Generate_dance_sequence_request(length int, shift int) (*Result_payload, error) {
 	url := "http://localhost:8000/dance-sequence"
 
 	file, err := os.ReadFile("../app/data/dance_data.json")
@@ -38,6 +39,7 @@ func Generate_dance_sequence_request(length int) (*Result_payload, error) {
 	payload := generate_payload{
 		MusicID:         "music_id",
 		Length:          length,
+		Shift:           shift,
 		StartFrameIndex: 0,
 		Payload:         result,
 	}
