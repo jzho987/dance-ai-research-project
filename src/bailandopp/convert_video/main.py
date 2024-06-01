@@ -202,16 +202,13 @@ def json_to_img(input_dir, output_dir, width, height, worker_num=16):
     pool.join()
 
 
-def visualizeAndWrite(np_dance, output_dir, music_path):
-    np_dance = np.array(result)
-
+def visualizeAndWrite(np_dance, output_dir, music_path, name):
     b, c = np_dance.shape
     np_dance = np_dance.reshape([b, c//3, 3])
     np_dance2 = np_dance[:, :, :2] / 1.5
     np_dance2[:, :, 0] /= 2.2
+    # np_dance2[:, :, 1] -= 0.6
     np_dance_trans = np.zeros([b, 25, 2]).copy()
-    if pregen:
-        np_dance2[:, :, 1] = np_dance2[:, :, 1] - 1
     
     # head
     np_dance_trans[:, 0] = np_dance2[:, 12]
@@ -258,7 +255,7 @@ def visualizeAndWrite(np_dance, output_dir, music_path):
 
     to_json(np_dance_result, TMP_DIR_JSON, width=960, height=540)
     json_to_img(TMP_DIR_JSON, TMP_DIR_IMAGE, width=960, height=540)
-    img_to_video_with_audio(TMP_DIR_IMAGE, output_dir, music_path)
+    img_to_video_with_audio(TMP_DIR_IMAGE, output_dir, music_path, name=name)
 
     # clean up temp folder
     if os.path.exists(TMP_DIR_JSON):
@@ -271,7 +268,8 @@ def process_generated(file, model_path):
         json_obj = json.loads(f.read())
         dict = EasyDict(json_obj)
         result, quant = dict.result, dict.quant
-        # result = json_obj
+        # result = json_obj[0]
+    print(np.shape(result))
     smpl = SMPL(model_path=model_path, gender='MALE', batch_size=1)
     np_dances_original = []
     dance_datas = []
@@ -308,7 +306,8 @@ def process_generated(file, model_path):
 def process_pregen(file):
     with open(file) as f:
         json_obj = json.loads(f.read())
-        result = json_obj['dance_array']
+        result = json_obj['result']
+        # result = json_obj
     np_dance = np.array(result)
     return np_dance
 
@@ -318,21 +317,22 @@ if __name__ == "__main__":
         description="Pytorch implementation of Music2Dance"
     )
     parser.add_argument("--file", default='results.json')
+    parser.add_argument("--name", default='untitled_video.json')
+    parser.add_argument("--music", default='music.wav')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--pre", action='store_true') # generate video with simple processed smpl data
-    group.add_argument("--pose", action='store_true') # generate video with generated data from the model
+    group.add_argument("--post", action='store_true') # generate video with generated data from the model
     args = parser.parse_args()
 
     # temp vars
     model_path = "./SMPL_MALE.pkl"
     output_path = "./"
-    music_path = "./music.wav"
     
     if args.pre:
         pregen = False
-        result = process_generated(args.file, model_path)
+        result = process_pregen(args.file)
     elif args.post:
         pregen = True
-        result = process_pregen(args.file)
+        result = process_generated(args.file, model_path)
 
-    visualizeAndWrite(result, output_path, music_path)
+    visualizeAndWrite(result, output_path, args.music, args.name)
