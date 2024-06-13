@@ -7,6 +7,7 @@ import numpy as np
 import base64
 import essentia
 from essentia.standard import *
+from smplx import SMPL
 import os
 import torch
 
@@ -14,6 +15,7 @@ from models.bailando import Bailando
 import config.config as cf
 import config.gpt_config as gpt_cf
 import config.vqvae_config as vq_cf
+from utils.format import format_rotmat_output
 
 # global
 DEFAULT_SAMPLING_RATE = 15360*2/8
@@ -27,7 +29,10 @@ async def boostrap(app, loop):
     print(f"use device: {device}")
     app.ctx.agent = Bailando(vq_cf, gpt_cf, cf, device, "./weight/vqvae.pt", "./weight/gpt.pt")
     app.ctx.cache = {"hello": "world"}
+    app.ctx.smpl = SMPL(model_path=cf.smpl_model_path, gender='MALE', batch_size=1)
+
     print(">finished boostrap")
+
 
 # routes
 @app.post("/music")
@@ -39,7 +44,7 @@ async def send_music(request):
     await handle_send_music(music_id=musicID, payload=payload)
     return HTTPResponse(status=200)
 
-# routes
+
 @app.post("/dance-sequence")
 async def generate_dance_sequence(request):
     print("received generate dance sequence request")
@@ -50,10 +55,12 @@ async def generate_dance_sequence(request):
     length = request.length # how long of a clip to generate
     shift = request.shift # amount of user input to generate from
 
+    # with open("pregen.json", 'w') as f:
+    #     f.write(json.dumps(payload))
     result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length, shift=shift)
-    # with open("bailando_app.json", "w") as f:
-    #     f.write(json.dumps(result.data.cpu().numpy().tolist()))
     result = result.squeeze(0).cpu().numpy().tolist()
+    result = format_rotmat_output(result, app.ctx.smpl)
+    print(np.shape(result))
     quant_up, quant_down = quant
     quant = [quant_up.tolist(), quant_down.tolist()]
 
@@ -62,7 +69,10 @@ async def generate_dance_sequence(request):
         'quant': quant
     }
     response = json.dumps(response)
+    # with open("results.json", 'w') as f:
+    #     f.write(response)
     return HTTPResponse(body=response, status=200)
+
 
 # handlers
 async def handle_send_music(music_id, payload):

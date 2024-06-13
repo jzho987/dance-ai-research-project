@@ -62,11 +62,18 @@ def decode(agent: Bailando, json_path, out_path):
         f.write(json.dumps(out))
 
 
-def endec(agent: Bailando, json_path, out_path):
+def endec(agent: Bailando, json_path, out_path, device="cuda"):
     with open(json_path) as f:
         json_obj = json.loads(f.read())
-    input = torch.tensor(json_obj).unsqueeze(0).cuda()
-    up, down = agent.encode(input)
+    np_dance = np.array(json_obj)
+    # transform for non rotmat data
+    root = np_dance[:, :3]
+    np_dance = np_dance - np.tile(root, (1, 24))
+    np_dance[:, :3] = root
+    for kk in range((len(np_dance) // 5 + 1) * 5 - len(np_dance) ):
+        np_dance = np.append(np_dance, np_dance[-1:], axis=0)
+    dance_input = torch.tensor(np_dance, dtype=torch.float32).unsqueeze(0).to(torch.device(device))
+    up, down = agent.encode(dance_input)
     out = agent.decode(up, down).cpu().numpy().tolist()
     with open(out_path, "w") as f:
         f.write(json.dumps(out))
@@ -77,7 +84,7 @@ def main():
     args = parse_args()
 
     # build agent
-    agent = Bailando(vq_cf, gpt_cf, cf, "cuda", vq_ckpt_dir="./weight/vqvae.pt", gpt_ckpt_dir="./weight/gpt.pt")
+    agent = Bailando(vq_cf, gpt_cf, cf, "mps", vq_ckpt_dir="./weight/vqvae.pt", gpt_ckpt_dir="./weight/gpt.pt")
 
     # start eval
     if args.eval:
@@ -85,7 +92,7 @@ def main():
     if args.decode:
         decode(agent, args.input_dir, args.output_dir)
     if args.endec:
-        endec(agent, args.input_dir, args.output_dir)
+        endec(agent, args.input_dir, args.output_dir, "mps")
 
 
 if __name__ == "__main__":

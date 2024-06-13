@@ -189,8 +189,8 @@ class CrossCondGPT2MWAC(nn.Module):
         padding_size = self.padding_size
 
         x_up, x_down = xs
-        assert x_up.size(1) >= shift, f"upper condition size less than initial shift, upper condition size: {x_up.size(1)}"
-        assert x_down.size(1) >= shift, f"lower condition size less than initial shift, lower condition size: {x_up.size(1)}"
+        assert x_up.size(1) >= shift, f"upper condition size less than initial shift, upper condition shape: {x_up.shape}"
+        assert x_down.size(1) >= shift, f"lower condition size less than initial shift, lower condition shape: {x_up.shape}"
         # chop to fit shift size
         x_up = x_up[:,:shift]
         x_down = x_down[:,:shift]
