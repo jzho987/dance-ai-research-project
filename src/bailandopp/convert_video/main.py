@@ -326,7 +326,7 @@ if __name__ == "__main__":
 
     # temp vars
     model_path = "./SMPL_MALE.pkl"
-    output_path = "./"
+    output_path = "./video"
     
     if args.pre:
         pregen = False
