@@ -18,7 +18,7 @@ import config.vqvae_config as vq_cf
 from utils.format import format_rotmat_output
 
 # global
-DEFAULT_SAMPLING_RATE = 15360*2/8
+DEFAULT_SAMPLING_RATE = 15360*2
 app = Sanic("ai_agent_server")
 
 # boostrap
@@ -55,8 +55,6 @@ async def generate_dance_sequence(request):
     length = request.length # how long of a clip to generate
     shift = request.shift # amount of user input to generate from
 
-    # with open("pregen.json", 'w') as f:
-    #     f.write(json.dumps(payload))
     result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length, shift=shift)
     result = result.squeeze(0).cpu().numpy().tolist()
     result = format_rotmat_output(result, app.ctx.smpl)
