@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+torch = "*"
+chumpy = "*"
+smplx = "*"
+easydict = "*"
+opencv-python = "*"
+tqdm = "*"
+pillow = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
+python_full_version = "3.9.18"
