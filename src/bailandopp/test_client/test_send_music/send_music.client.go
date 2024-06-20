@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -15,17 +16,22 @@ type music_payload struct {
 	Payload string `json:"payload"`
 }
 
-func Send_music_request() error {
-	url := "http://localhost:8000/music"
+func SendMusicRequest(fileName *string, musicID string) error {
+	url := "http://192.168.1.98:8000/music"
 
-	file, err := os.ReadFile("data/mBR0.wav")
+	name := "../data/chill_music.wav"
+	if fileName != nil {
+		name = *fileName
+	}
+	fmt.Printf("use music: %s \n", name)
+	file, err := os.ReadFile(name)
 	if err != nil {
 		print("failed to read file")
 		return err
 	}
 	payloadString := base64.StdEncoding.EncodeToString(file)
 	payload := music_payload{
-		MusicID: "music_id",
+		MusicID: musicID,
 		Payload: payloadString,
 	}
 	data, err := json.Marshal(payload)

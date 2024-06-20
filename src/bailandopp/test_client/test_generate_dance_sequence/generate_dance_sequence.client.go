@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"os"
 )
 
 type generate_payload struct {
@@ -22,26 +21,15 @@ type Result_payload struct {
 	Quant  [][]float32 `json:"quant"`
 }
 
-func Generate_dance_sequence_request(length int, shift int) (*Result_payload, error) {
+func Generate_dance_sequence_request(length int, shift int, input [][]float32, musicName string) (*Result_payload, error) {
 	url := "http://localhost:8000/dance-sequence"
 
-	file, err := os.ReadFile("../app/data/dance_data.json")
-	if err != nil {
-		print("failed to read file")
-		return nil, err
-	}
-	var result [][]float32
-	err = json.Unmarshal(file, &result)
-	if err != nil {
-		print("failed to unmarshal")
-		return nil, err
-	}
 	payload := generate_payload{
-		MusicID:         "music_id",
+		MusicID:         musicName,
 		Length:          length,
 		Shift:           shift,
 		StartFrameIndex: 0,
-		Payload:         result,
+		Payload:         input,
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
