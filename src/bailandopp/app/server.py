@@ -16,8 +16,10 @@ import config.config as cf
 import config.gpt_config as gpt_cf
 import config.vqvae_config as vq_cf
 from utils.format import format_rotmat_output
+from sanic.worker.manager import WorkerManager
 
 # global
+WorkerManager.THRESHOLD = 600 # Value is in 0.1s
 DEFAULT_SAMPLING_RATE = 15360*2
 app = Sanic("ai_agent_server")
 
