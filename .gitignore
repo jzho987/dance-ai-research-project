@@ -166,5 +166,9 @@ cython_debug/
 *.blg
 *.spl
 
-# weights
-.pkl
+# other files
+.DS_Store
+*.jpg
+*.wav
+*.pkl
+*.tar.gz
