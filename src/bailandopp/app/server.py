@@ -26,14 +26,17 @@ app = Sanic("ai_agent_server")
 # boostrap
 @app.before_server_start
 async def boostrap(app, loop):
-    print(">init boostrap")
+    print("Initializing Boostrap.")
+
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     print(f"use device: {device}")
-    app.ctx.agent = Bailando(vq_cf, gpt_cf, cf, device, "./weight/vqvae.pt", "./weight/gpt.pt")
-    app.ctx.cache = {"hello": "world"}
-    app.ctx.smpl = SMPL(model_path=cf.smpl_model_path, gender='MALE', batch_size=1)
 
-    print(">finished boostrap")
+    app.ctx.agent = Bailando(vq_cf, gpt_cf, cf, device, "./weight/vqvae.pt", "./weight/gpt.pt")
+    app.ctx.smpl = SMPL(model_path=cf.smpl_model_path, gender='MALE', batch_size=1)
+    app.ctx.cache = {}
+    app.ctx.prev = []
+
+    print("Finished Boostrap.")
 
 
 # routes
@@ -54,8 +57,9 @@ async def generate_dance_sequence(request):
     musicID = request.musicID
     startFrameIndex = request.startFrameIndex
     payload = request.payload
-    length = request.length # how long of a clip to generate
-    shift = request.shift # amount of user input to generate from
+    length = request.length # how long of a clip to generate.
+    shift = request.shift # amount of seed from previous motion clip to take.
+    seed = request.seed # amount of user input to generate from, this will override user input from pos 0.
 
     result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length, shift=shift)
     result = result.squeeze(0).cpu().numpy().tolist()
@@ -69,8 +73,6 @@ async def generate_dance_sequence(request):
         'quant': quant
     }
     response = json.dumps(response)
-    # with open("results.json", 'w') as f:
-    #     f.write(response)
     return HTTPResponse(body=response, status=200)
 
 
@@ -131,16 +133,13 @@ async def handle_send_music(music_id, payload):
     for kk in range(wav_padding):
         np_music = np.append(np_music, np.zeros_like(np_music[-1:]), axis=0)
     feature = np_music
-    # # test
-    # with open("output_music.json", "w") as f:
-    #     print(feature)
-    #     f.write(json.dumps(feature.tolist()))
 
     key = f'{music_id}-processed'
     app.ctx.cache[key] = feature
 
     # post
     os.remove(file_name)
+
 
 async def handle_generate_dance_sequence(music_id, start_frame_index, payload, length, shift):
     print("handling generate dance sequence request")
