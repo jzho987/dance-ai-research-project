@@ -64,7 +64,7 @@ func main() {
 
 func QueryAndWriteToJson(requestLength int, requestShift int, input [][]float32, outFileName string) [][]float32 {
 
-	response, err := test_generate_dance_sequence.Generate_dance_sequence_request(REQUEST_LENGTH, REQUEST_SHIFT, input)
+	response, err := test_generate_dance_sequence.Generate_dance_sequence_request(REQUEST_LENGTH, REQUEST_SHIFT, input, "music", 0)
 	if err != nil {
 		fmt.Println("failed to generate dance sequence")
 		panic(err)

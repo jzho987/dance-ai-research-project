@@ -22,6 +22,7 @@ func main() {
 		print("failed to send music")
 		panic(err)
 	}
+	return
 
 	sourceDir := "./data/motion/"
 	resultDir := "./result/"
@@ -48,7 +49,7 @@ func main() {
 
 func QueryAndWriteToJson(requestLength int, requestShift int, payload [][]float32, outFileName string, musicName string) {
 
-	response, err := test_generate_dance_sequence.Generate_dance_sequence_request(REQUEST_LENGTH, REQUEST_SHIFT, payload, musicName)
+	response, err := test_generate_dance_sequence.Generate_dance_sequence_request(REQUEST_LENGTH, REQUEST_SHIFT, payload, musicName, 0)
 	if err != nil {
 		fmt.Println("failed to generate dance sequence")
 		panic(err)

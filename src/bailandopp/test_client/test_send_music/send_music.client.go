@@ -17,7 +17,7 @@ type music_payload struct {
 }
 
 func SendMusicRequest(fileName *string, musicID string) error {
-	url := "http://192.168.1.98:8000/music"
+	url := "http://localhost:8000/music"
 
 	name := "../data/chill_music.wav"
 	if fileName != nil {

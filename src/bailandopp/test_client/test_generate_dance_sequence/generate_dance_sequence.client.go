@@ -14,6 +14,7 @@ type generate_payload struct {
 	Length          int         `json:"length"`
 	Shift           int         `json:"shift"`
 	Payload         [][]float32 `json:"payload"`
+	Seed            int         `json:"seed"`
 }
 
 type Result_payload struct {
@@ -21,7 +22,7 @@ type Result_payload struct {
 	Quant  [][]float32 `json:"quant"`
 }
 
-func Generate_dance_sequence_request(length int, shift int, input [][]float32, musicName string) (*Result_payload, error) {
+func Generate_dance_sequence_request(length int, shift int, input [][]float32, musicName string, seed int) (*Result_payload, error) {
 	url := "http://localhost:8000/dance-sequence"
 
 	payload := generate_payload{
@@ -30,6 +31,7 @@ func Generate_dance_sequence_request(length int, shift int, input [][]float32, m
 		Shift:           shift,
 		StartFrameIndex: 0,
 		Payload:         input,
+		Seed:            seed,
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
