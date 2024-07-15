@@ -61,10 +61,11 @@ async def generate_dance_sequence(request):
     shift = request.shift # amount of seed from previous motion clip to take.
     seed = request.seed # amount of user input to generate from, this will override user input from pos 0.
 
-    result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length, shift=shift)
+    result, quant = await handle_generate_dance_sequence(music_id=musicID, start_frame_index=startFrameIndex, payload=payload, length=length, shift=shift, seed=seed)
     result = result.squeeze(0).cpu().numpy().tolist()
     result = format_rotmat_output(result, app.ctx.smpl)
     print(np.shape(result))
+    app.ctx.prev = result
     quant_up, quant_down = quant
     quant = [quant_up.tolist(), quant_down.tolist()]
 
@@ -122,7 +123,7 @@ async def handle_send_music(music_id, payload):
     music_move = cf.move
     np_music = np.array(feature)
 
-    # IMPORTANT tranformation before store
+    # NOTE: transformation before store.
     # zero padding left
     for kk in range(wav_padding):
         np_music = np.append(np.zeros_like(np_music[-1:]), np_music, axis=0)
@@ -141,7 +142,7 @@ async def handle_send_music(music_id, payload):
     os.remove(file_name)
 
 
-async def handle_generate_dance_sequence(music_id, start_frame_index, payload, length, shift):
+async def handle_generate_dance_sequence(music_id, start_frame_index, payload, length, shift, seed):
     print("handling generate dance sequence request")
     agent: Bailando = app.ctx.agent
     cache = app.ctx.cache
@@ -149,6 +150,12 @@ async def handle_generate_dance_sequence(music_id, start_frame_index, payload, l
 
     # transform
     np_dance = np.array(payload)
+    print(np.shape(np_dance))
+    if seed > 0 and app.ctx.prev != None and len(app.ctx.prev) >= seed:
+        print(f"using seed motion; count: {seed}")
+        input_seed = np.array(app.ctx.prev[:seed])
+        np_dance = np.concatenate((input_seed, np_dance), axis=0)
+    print(np.shape(np_dance))
     root = np_dance[:, :3]
     np_dance = np_dance - np.tile(root, (1, 24))
     np_dance[:, :3] = root
