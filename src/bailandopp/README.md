@@ -2,6 +2,23 @@
 
 Bailandopp is a dance AI model created by Siyao et al. This directory refactors their original code and wraps it in a web server to expose the functionalities to our unity project.
 
+## App
+
+This is where the application server is. We use sanic to run the application server to host the AI agent for the clients to connect to.
+
+### How to use
+
+Make sure to first download all the requirements using the requirements.txt file, or manually download the requirements.
+Then run this to start the sanic app.
+```
+sanic server
+```
+If you want the server to not just be on localhost, make sure to specify the host url
+```
+sanic server --host 0.0.0.0
+```
+
+
 ## Test Clients
 
 These are the golang clients that details the request and response regarding each endpoints in the AI agent server.
