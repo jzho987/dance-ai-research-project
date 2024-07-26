@@ -1,0 +1,101 @@
+\documentclass[final,5p,times,authoryear]{article}
+\usepackage{cite}
+\begin{document}
+
+\title{Living Document}
+\author{Jiazhi Zhou}
+\maketitle
+
+\begin{abstract}
+
+This document is used to track progress of the experiments, and literatures read.
+
+\end{abstract}
+
+\section{Introduction}
+% a few motivating statements
+
+TODO: write.
+
+\section{Related Work}
+% a list of all papers you’ve read, in clusters of similarity, with a few comments on what it was, what was relevant for your project
+% some papers will be less relevant, used for context, other papers that are more relevant you can spend more space describing
+
+TODO: write.
+
+\section{Project Context}
+% briefly describe goal to support embodied improvisation in VR, for performance, public installation, home use, equipment, etc.
+% requirements for ai agent
+
+Goal:
+
+The goal of this project is to explore the capabilities of generative AI models
+in supporting various embodied creativity exercises. These include embodied
+dance improvisations, performances, public installations and so on.
+
+LumnAI (add ref) is used for public installation. However it is a algorithm and
+not a generative deep learning model.
+
+requirements:
+
+For the generative AI to add to the embodied creativity, there are some
+requirements that the AI model has to fulfill.
+
+1. Run fast
+The AI model has to be able to run quickly. As most machine learning clusters
+are not connected to the internet, and would be useless for actively using for a
+project like this.
+
+The model has to be able to run on a standalone device, such as a PC or a
+laptop. This requires the model to be small enough to load, and run fast enough
+so the user feels minimal lag in their input and the models' outuput
+
+2. Small Size
+If the model is too large, it would not load on a easily portable device, like a
+laptop or a PC, making it impossible to be used.
+
+3. Take in user input
+This requirement takes affect in two senses. One is that, the model has to have
+the user input as a condition that it generates on. The other is that the model
+has to be able to process any user input.
+
+Machine learning model tends to focus on the data that they are trained on, and
+if a model only generates well on its training data, it would not be good for a
+public installation, as we can not predict user movements.
+
+\section{Procedures}
+% what AI agents you’ve explored so far, main training set and characteristics of each
+% describe the goal for re-seeding of the ai agent, and technical details of doing so, how you’ve extended the ai agent.
+% describe the parameter explorations that you’ve done
+
+What AI Agents we have explored so far.
+
+The existing "dance generation" AIs were reviewed, and filtered based on
+availability as well as fit for purpose. The models that were publicly
+available, and fit our requirement, of generating future dance based on dance
+input, were evaluated. The most fit for purpose model was picked to be the
+Bailando++ model. The MNET model was also seen as a viable choice but due to its
+complications in training, we have deferred the use of this model for the
+current research till a later date. The DanY (Dance With You) model is the most
+fit for purpose, but the model size and training complexity made it out of scope
+for this current project.
+
+\subsection{Bailando++}
+
+Bailando++ is a model that we explored. This model fits our base requirements of
+being small, fast to run, and can be configured to have user's dance input as a
+generation condition.
+
+\subsubsection{Model Details}
+This model uses a vector quantized variational auto encoder (VQVAE). The use of
+this module at the start, to quantize any dance inputs, mean the actual
+generation step only uses a latent space representation of the input data. But
+this highlights the importance of the quality of the VQVAE. As this mean all
+inputs will be quantized by the encoder, and if the encoder fails to encode and
+decode input in a believable way, the user input will be skewed, and the output
+would not give the user the impression that their input took affect. 
+
+\subsubsection{}
+
+
+\end{document}
