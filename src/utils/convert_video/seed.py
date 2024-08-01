@@ -7,7 +7,7 @@ CONTEXT_LENGTH = 28
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Pytorch implementation of Music2Dance"
+        description=""
     )
     parser.add_argument("--end", default='./generated')
     parser.add_argument("--start", default='./pregen')
