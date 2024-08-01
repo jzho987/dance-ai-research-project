@@ -48,6 +48,7 @@ def eye(n, batch_shape):
 
 
 def format_rotmat_output(result, smpl):
+    print("rotmat shape", np.shape(result))
     np_dances_rotmat = []
     np_dance = np.array(result)
     np_dances_rotmat.append(np_dance)

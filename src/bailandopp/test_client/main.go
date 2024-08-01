@@ -22,7 +22,6 @@ func main() {
 		print("failed to send music")
 		panic(err)
 	}
-	return
 
 	sourceDir := "./data/motion/"
 	resultDir := "./result/"

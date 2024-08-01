@@ -306,8 +306,8 @@ def process_generated(file, model_path):
 def process_pregen(file):
     with open(file) as f:
         json_obj = json.loads(f.read())
-        result = json_obj['result']
-        # result = json_obj
+        # result = json_obj['result']
+        result = json_obj
     np_dance = np.array(result)
     return np_dance
 
