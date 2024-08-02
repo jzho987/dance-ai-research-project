@@ -79,10 +79,10 @@ def load_music(music_path: str):
 
 
 def load_motion(dance_path: str, seed_length = 60):
-    with open(dance_path, 'r') as f:
-        dance_array = json.loads(f.read())
-    dance = torch.from_numpy(np.array(dance_array['pose'])).float().view(-1, 72)
-    trans = torch.from_numpy(np.array(dance_array['root'])).float()
+    with open(dance_path, 'rb') as f:
+        dance_array = pkl.loads(f.read())
+    dance = torch.from_numpy(np.array(dance_array['smpl_poses'])).float().view(-1, 72)
+    trans = torch.from_numpy(np.array(dance_array['smpl_trans'] / dance_array['smpl_scaling'])).float()
     print(dance.shape)
     print(trans.shape)
     motion = torch.cat([dance, trans], dim=1)[:seed_length]
@@ -103,7 +103,7 @@ def eval(weight_path: str, music_path: str, dance_path: str):
     t_music = t_music.to(device)
     t_dance = t_dance.to(device)
     noise = torch.randn(1, 256).to(device)
-    genre = torch.tensor(Genres['gBR'], dtype=torch.long).unsqueeze(0)
+    genre = torch.tensor(3, dtype=torch.long).unsqueeze(0)
     
     # render video
     smpl = SMPL(model_path='./', gender='MALE', batch_size=1).eval().to(device)
@@ -120,4 +120,4 @@ def main(weight_path: str, music_path: str, dance_path: str):
 
 
 if __name__ == "__main__":
-    main("./weights/last.ckpt", "./mBR0.wav", "./motion.json")
+    main("./weights/last.ckpt", "./mBR0.wav", "./motion2.pkl")
