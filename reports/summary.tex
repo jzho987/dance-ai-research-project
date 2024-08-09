@@ -95,7 +95,70 @@ inputs will be quantized by the encoder, and if the encoder fails to encode and
 decode input in a believable way, the user input will be skewed, and the output
 would not give the user the impression that their input took affect. 
 
-\subsubsection{}
+After the encoding step, the model uses a transformer block to generate the new
+dance moves using both the dance input context, and the music context. The use
+of different music is explored and discussed in a later section, but it varies
+the output generated and can be leveraged to generate different styles of
+output.
+
+\subsubsection{Modle Evaluation}
+Evaluation was ran using wild music and dance input to ensure the model can
+perform well when integrated into the body tracking system. The steps taken to
+evaluate a model is: 1. pre-recorded body-tracked dances were saved to obj files, which were
+loaded into Unity and the joint key point data were captured at 60 frames per
+second and piped into a json file. 2. the json inputs are put into a script to generate
+the pregen dance animation, in order to validate the quality of the input
+motion. 3. the direct endec loop was ran on the pregen motion and the output was
+evaluated on how good the encoding and decoding of the VQVAE was. 4. 5 different
+music was chosen to generate dance output with using all 12 captured pregen
+motions. This is then compiled into a sequential video format and showed to the
+expert stakeholders.
+
+\subsection{MNET}
+
+MNET is a model that uses a GAN architecture to produce future dances. The
+pretrained model was not available publicly so we used their public code to
+reproduce the training.
+
+\subsubsection{Model Training}
+
+The code had to be modified to fit the training. The hyper-parameters the
+researchers used were copied from their paper into the configs for training, and
+we used a single A100 GPU to train up to the recommended 500k steps. The output
+motion was jittery so further training was ran but the model over-fit the data
+after 500k steps so we avoided further training.
+
+
+\subsubsection{Model Evaluation}
+The model takes input in the SMPL format, which is challenging to get from Unity
+directly. We used a publicly available repository called joint2smpl to fit the
+3d joint coordinates to a SMPL format, with axis-rotation poses, and smpl
+translation information. The motions were then evaluated using the 500k step
+model, the 420k step, 460k step, and 480k step models. This was done in order to observe the
+affects of over-fitting. The 480k and above models were heavily over-fitting on
+the training data, and the 420k model was under trained, so we had to use the
+460k step model for the initial evaluation. The results were around 1 second of
+usable output before the model regressed to a mean pose position. This problem
+will be tackled later but for now the 1 second of usable output will be enough
+for evaluation and implementation into the body tracking framework.
+
+\subsubsection{Issues with MNET}
+As mentioned perviously MNET, as well as many other generative dance AIs use
+SMPL format input. This is problematic to retrieve on the fly, as SMPL format
+data uses joint rotation instead of absolute join coordinates, so we need to
+perform a transformation from the joint coordinates to the SMPL axis-angle
+rotation. Using the joint2smpl repository, we were able to retrieve a good
+output, which matches the motion we render using the joint coordinate matches up
+with the rendered SMPL dance. However, this fit step runs sequentially since it
+estimates the next pose using the previous pose for a better fit, and running
+the fit on a macbook with a m2 processor using MPS takes around 30 minutes, for
+a 1 second clip, and this is not improved when using our A100 cluster, as it
+runs sequentially by default. Another issue with MNET is the ability to adapt to
+wild motion. The model is validated using testing motion, but this does not
+account for "wild" motion, that is produced using the Unity to joint2smpl
+pipeline, which is the potential cause for the low quality output using truely
+wild motion.
+
 
 
 \end{document}
