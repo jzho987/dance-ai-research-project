@@ -1,5 +1,4 @@
-import os
-import yaml
+import argparse
 import librosa
 from utils.feature_extrator import FeatureExtractor
 from utils.video import render_video
@@ -18,12 +17,12 @@ Genres = {
     'gPO': 1,
     'gLO': 2,
     'gMH': 3,
-    'gLH': 4,
-    'gHO': 5,
-    'gWA': 6,
-    'gKR': 7,
-    'gJS': 8,
-    'gJB': 9,
+    # 'gLH': 4,
+    # 'gHO': 5,
+    # 'gWA': 6,
+    # 'gKR': 7,
+    # 'gJS': 8,
+    # 'gJB': 9,
 }
 
 
@@ -35,7 +34,6 @@ def load_model(model_path, config: gen_cf, device_str: str):
     for key in loaded_state_dict:
         if key.split(".")[0] == "gen":
             new_key = key[4:]
-            print(new_key)
             model_state_dict[new_key] = loaded_state_dict[key]
     
     agent = DanceGenerator(config.dim, config.depth, config.heads, config.mlp_dim, config.music_length, config.seed_m_length, config.predict_length, config.rot_6d)
@@ -79,10 +77,12 @@ def load_music(music_path: str):
 
 
 def load_motion(dance_path: str, seed_length = 60):
-    with open(dance_path, 'rb') as f:
-        dance_array = pkl.loads(f.read())
-    dance = torch.from_numpy(np.array(dance_array['smpl_poses'])).float().view(-1, 72)
-    trans = torch.from_numpy(np.array(dance_array['smpl_trans'] / dance_array['smpl_scaling'])).float()
+    # with open(dance_path, 'rb') as f:
+    #     dance_array = pkl.loads(f.read())
+    with open(dance_path, 'r') as f:
+        dance_array = json.loads(f.read())
+    dance = torch.from_numpy(np.array(dance_array['smpl_pose'])).float().view(-1, 72)
+    trans = torch.from_numpy(np.array(dance_array['smpl_trans'])).float()
     print(dance.shape)
     print(trans.shape)
     motion = torch.cat([dance, trans], dim=1)[:seed_length]
@@ -90,34 +90,41 @@ def load_motion(dance_path: str, seed_length = 60):
 
     return motion
 
-def eval(weight_path: str, music_path: str, dance_path: str):
+def eval(weight_path: str, music_path: str, dance_path: str, out_dir: str):
     # load model
     device = torch.device('mps')
     mnet = load_model(weight_path, gen_cf, "mps")
 
-    t_music = load_music(music_path)
-    t_dance = load_motion(dance_path)
+    num_genres = len(Genres)
+    t_music = load_music(music_path).repeat((num_genres, 1, 1))
+    t_dance = load_motion(dance_path).repeat((num_genres, 1, 1))
     if device == torch.device('mps'):
         t_music = t_music.type(torch.float32)
         t_dance = t_dance.type(torch.float32)
     t_music = t_music.to(device)
     t_dance = t_dance.to(device)
-    noise = torch.randn(1, 256).to(device)
-    genre = torch.tensor(3, dtype=torch.long).unsqueeze(0)
+    noise = torch.randn(num_genres, 256).to(device)
+    genre = torch.tensor(list(Genres.values()), dtype=torch.long)
     
     # render video
-    smpl = SMPL(model_path='./', gender='MALE', batch_size=1).eval().to(device)
+    smpl = SMPL(model_path='../../data/', gender='MALE', batch_size=1).eval().to(device)
     with torch.no_grad():
         print(t_dance.shape)
         mnet.eval()
+        print(t_music.shape, t_dance.shape, noise.shape, genre.shape)
         gen_dance = mnet.inference(t_music, t_dance, noise, genre)
-        render_video(gen_dance, smpl, "./", "./mBR0.wav")
+        render_video(gen_dance, smpl, out_dir, music_path)
 
 
-
-def main(weight_path: str, music_path: str, dance_path: str):
-    eval(weight_path, music_path, dance_path)
+def main(weight_path: str, music_path: str, dance_path: str, out_dir: str):
+    eval(weight_path, music_path, dance_path, out_dir)
 
 
 if __name__ == "__main__":
-    main("./weights/last.ckpt", "./mBR0.wav", "./motion2.pkl")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("motion", default='motion.pkl')
+    parser.add_argument("music", default='mBR0.wav')
+    parser.add_argument("save_dir", default='./')
+    args = parser.parse_args()
+
+    main("./weights/weight_more.ckpt", args.music, args.motion, args.save_dir)
