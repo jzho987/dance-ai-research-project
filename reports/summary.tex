@@ -130,18 +130,23 @@ after 500k steps so we avoided further training.
 
 
 \subsubsection{Model Evaluation}
-The model takes input in the SMPL format, which is challenging to get from Unity
-directly. We used a publicly available repository called joint2smpl to fit the
-3d joint coordinates to a SMPL format, with axis-rotation poses, and smpl
-translation information. The motions were then evaluated using the 500k step
-model, the 420k step, 460k step, and 480k step models. This was done in order to observe the
-affects of over-fitting. The 480k and above models were heavily over-fitting on
-the training data, and the 420k model was under trained, so we had to use the
-460k step model for the initial evaluation. The results were around 1 second of
-usable output before the model regressed to a mean pose position. This problem
-will be tackled later but for now the 1 second of usable output will be enough
-for evaluation and implementation into the body tracking framework.
 
+\subsubsection{In The Wild Generation}
+We used MNET to generate videos "in-the-wild" with motion taken from the
+recorded sequences from Unity, and music not in the AIST++ dataset. The steps we
+took to generate the videos are.
+
+1. using joint2smpl library to convert the 3d joint coordinate data into SMPL
+parameters
+2. using the SMPL parameters and rendering videos from it to evaluate the motion
+quality of the converted motion.
+3. after validating the motion resembles the original dance, first 60 seconds of
+each clip is used by the model to generate dances with AIST music 
+4. the validated motion are then used to generate dances with new music
+
+The resulting dance is of poor quality, especially when using new music. The
+first output clip is immediately attempts to regress back to the SMPL mean
+position with each clip regressing more and more.
 \subsubsection{Issues with MNET}
 As mentioned perviously MNET, as well as many other generative dance AIs use
 SMPL format input. This is problematic to retrieve on the fly, as SMPL format
