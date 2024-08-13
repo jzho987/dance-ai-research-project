@@ -5,6 +5,7 @@ from utils.video import render_video
 import torch
 import numpy as np
 import json
+import os
 import pickle as pkl
 
 from smplx import SMPL
@@ -17,12 +18,12 @@ Genres = {
     'gPO': 1,
     'gLO': 2,
     'gMH': 3,
-    # 'gLH': 4,
-    # 'gHO': 5,
-    # 'gWA': 6,
-    # 'gKR': 7,
-    # 'gJS': 8,
-    # 'gJB': 9,
+    'gLH': 4,
+    'gHO': 5,
+    'gWA': 6,
+    'gKR': 7,
+    'gJS': 8,
+    'gJB': 9,
 }
 
 
@@ -79,10 +80,12 @@ def load_music(music_path: str):
 def load_motion(dance_path: str, seed_length = 60):
     # with open(dance_path, 'rb') as f:
     #     dance_array = pkl.loads(f.read())
+    #     dance = torch.from_numpy(np.array(dance_array['smpl_poses'])).float().view(-1, 72)
+    #     trans = torch.from_numpy(np.array(dance_array['smpl_trans'] / dance_array['smpl_scaling'])).float()
     with open(dance_path, 'r') as f:
         dance_array = json.loads(f.read())
-    dance = torch.from_numpy(np.array(dance_array['smpl_pose'])).float().view(-1, 72)
-    trans = torch.from_numpy(np.array(dance_array['smpl_trans'])).float()
+        dance = torch.from_numpy(np.array(dance_array['smpl_poses'])).float().view(-1, 72)
+        trans = torch.from_numpy(np.array(dance_array['smpl_trans'])).float()
     print(dance.shape)
     print(trans.shape)
     motion = torch.cat([dance, trans], dim=1)[:seed_length]
@@ -105,6 +108,9 @@ def eval(weight_path: str, music_path: str, dance_path: str, out_dir: str):
     t_dance = t_dance.to(device)
     noise = torch.randn(num_genres, 256).to(device)
     genre = torch.tensor(list(Genres.values()), dtype=torch.long)
+
+    if not (os.path.exists(out_dir) and os.path.isdir(out_dir)):
+        os.mkdir(out_dir)
     
     # render video
     smpl = SMPL(model_path='../../data/', gender='MALE', batch_size=1).eval().to(device)
@@ -122,9 +128,10 @@ def main(weight_path: str, music_path: str, dance_path: str, out_dir: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("motion", default='motion.pkl')
-    parser.add_argument("music", default='mBR0.wav')
-    parser.add_argument("save_dir", default='./')
+    parser.add_argument("--motion", default='motion.pkl')
+    parser.add_argument("--music", default='mBR0.wav')
+    parser.add_argument("--save_dir", default='./')
+    parser.add_argument("--weights", default='"./weights/weight_more.ckpt"')
     args = parser.parse_args()
 
-    main("./weights/weight_more.ckpt", args.music, args.motion, args.save_dir)
+    main(args.weights, args.music, args.motion, args.save_dir)
