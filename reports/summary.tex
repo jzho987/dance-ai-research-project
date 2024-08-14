@@ -99,7 +99,7 @@ were steps to be taken to insert dance input to the generator.
 The generator at core is a transformer block which we will call the gpt.
 The gpt which has a max context length of 28 and starts the generation at 1
 which is just a zero value to get started. The gpt then generates each
-subsequent pose sequentially until the desired length is reached. 
+subsequent pose sequentially until the desired length is reached.
 
 We converted the code to start the generation at 28, and bring in our own
 encoded dance sequence for those 28 pose codes. The gpt then generates the dance
@@ -116,7 +116,7 @@ and 3.7 seconds of input.
 
 These results were first intenally evaluated in the research group, and
 determined that using the full input length produced the most relevant output.
-The group also determined that more music types needed to be attempted. 
+The group also determined that more music types needed to be attempted.
 
 From there, we generated dance videos using 12 distinct input clips taken from the kinect
 recorded dance seuqences. We also used 6 different pieces of music, including
@@ -148,7 +148,7 @@ parameters
 2. using the SMPL parameters and rendering videos from it to evaluate the motion
 quality of the converted motion.
 3. after validating the motion resembles the original dance, first 60 seconds of
-each clip is used by the model to generate dances with AIST music 
+each clip is used by the model to generate dances with AIST music
 4. the validated motion are then used to generate dances with new music
 
 The resulting dance is of poor quality, especially when using new music. The
@@ -166,5 +166,30 @@ exact data could be lower quality and making the model regress to the mean pose.
 However the model will not be fit for use if data needs to be well formed, since
 input from the kinect will be low quality sometimes, and the model has to be
 able to deal with this quality.
+
+\section{Implementation Details}
+This section will provide a full overview as well as detailed description into how the implementation is done with an existing interaction framework developed in the Unity Game Engine.
+
+\subsection{Existing Project}
+The full body interaction with the AI model is built on top of the full body interaction framework. This section will provide context to what the existing project and the interaction framework achieves as a base to our AI integration.
+
+The existing interaction framework uses various sources of inputs to stream body pose data into the Unity Game Engine. This data is then used to render a Unity Skeleton with 22 joints excluding hand and finger joints. This is important as it maps well with the 24 joint SMPL format.
+
+The skeleton is not displayed directly when the framework is in use, but rather visual effects, such as Ribbons, Sand, etc. The original intent of these effects are to study their impact on human interaction. However, in the context of AI interaction, we want to have the user see the dance of the AI more concretely as to provide a good idea of what the AI is doing.
+
+The input types the framework takes in various in accuracy as well as complexity for setting up, and for use. For example, one source is a full body tracking suit, which is complicated to set up and use, but the positional accuracy of the suit is very high. On the other hand, another source is the Azure Kinect, and while it can be set up in minutes, the accuracy is only good when the user does not cross limbs and faces forward the whole time. We decided to mainly use the Kinect as a source while developing, and testing, since it allowed switching users without additional set up, and the accuracy we get is enough for the AI model.
+
+\subsection{Architecture Overview}
+The architecture we have chosen is to run the Unity project and the AI model on two seperate systems. The Unity project which requies drivers for the Azure Kinect needs to be installed on a Windows system, while dependencies for the AI model, including Conda, Python, Cuda drivers, etc., is best suited to run on a Linux system. The way to connect the two system was chosen to simply be HTTP, via REST APIs. The use of a more efficient or streaming system like websockets or gRPC is considered, but as shown after this, the response time of a REST API set up is so minimal it works quite well.
+
+For the AI model to receive data and return the results to the Unity project, we set up a REST endpoint to receive a 2D array of floats as the input payload, as well as parameters specifying the length for generation. This included the input context size, and the music to use. The model runs the input payload and produces the output that is then shipped back to the Unity project as another 2D float array.
+
+The music that is used for inference is sent to the web server in another endpoint where the waveform file binary is directly sent over. The preprocessing is done and saved in memory and can be used by specifying a music index when running inference on the dance input.
+
+On the Unity's side, a game manager records the user's input at 60FPS and ships the input to the web server. The response is used to render a skeleton. Since the response from the server is in 3D joint coordinates, the output can be directly mapped to world space coordinate in the game. However, for displaying poses, we want to render the skeleton mesh, which requires joint rotation rather than coordinate. This rotation was computed using the 3D joint coordinate and calculating the target directional vector of each joint. Then using Unity's Quaternion library's "From To Rotation" to rotate each joint to map it to the exact form as the original output.
+
+The final design of the Unity scene was set up with the user's skeletal mesh and the AI agent's skeletal mesh side by side. The reson for showing the user's own mesh is to show the user their input in terms of the motion capturing. The scene used a wooden floor and a black background to mimic a stage scene, and to provide the user with a more simple and pleasing scene.
+
+\section
 
 \end{document}
