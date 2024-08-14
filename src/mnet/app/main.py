@@ -6,6 +6,7 @@ import torch
 import numpy as np
 import json
 import os
+from einops import repeat
 import pickle as pkl
 
 from smplx import SMPL
@@ -78,14 +79,14 @@ def load_music(music_path: str):
 
 
 def load_motion(dance_path: str, seed_length = 60):
-    # with open(dance_path, 'rb') as f:
-    #     dance_array = pkl.loads(f.read())
-    #     dance = torch.from_numpy(np.array(dance_array['smpl_poses'])).float().view(-1, 72)
-    #     trans = torch.from_numpy(np.array(dance_array['smpl_trans'] / dance_array['smpl_scaling'])).float()
+    with open("./motion.pkl", 'rb') as f:
+        dance_array = pkl.loads(f.read())
+        # dance = torch.from_numpy(np.array(dance_array['smpl_poses'])).float().view(-1, 72)
+        trans = torch.from_numpy(np.array(dance_array['smpl_trans'] / dance_array['smpl_scaling'])).float()[:60, :]
     with open(dance_path, 'r') as f:
         dance_array = json.loads(f.read())
-        dance = torch.from_numpy(np.array(dance_array['smpl_poses'])).float().view(-1, 72)
-        trans = torch.from_numpy(np.array(dance_array['smpl_trans'])).float()
+        dance = torch.from_numpy(np.array(dance_array['smpl_poses']) * 0.8).float().view(-1, 72)
+        # trans = torch.from_numpy(np.array(dance_array['smpl_trans'] / dance_array['smpl_scaling'])).float()
     print(dance.shape)
     print(trans.shape)
     motion = torch.cat([dance, trans], dim=1)[:seed_length]
