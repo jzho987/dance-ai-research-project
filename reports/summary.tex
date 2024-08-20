@@ -52,7 +52,12 @@ so the user feels minimal lag in their input and the models' outuput
 
 2. Small Size
 If the model is too large, it would not load on a easily portable device, like a
-laptop or a PC, making it impossible to be used.
+laptop or a PC, making it impossible to be used. Most machine learning models are
+trained in machine learning clusters with A100 GPUs. However, most institutions do
+not have access to systems connected to the internet that also has GPUs like the A100.
+The easiest and most accessible high power GPUs are the 4000 series GPUs from
+Nvidia, and they will have up to 16GB of VRam. Any Machine learning model that do not
+fit on 16GB of Vram will not work with a framework like this.
 
 3. Take in user input
 This requirement takes affect in two senses. One is that, the model has to have
@@ -62,6 +67,14 @@ has to be able to process any user input.
 Machine learning model tends to focus on the data that they are trained on, and
 if a model only generates well on its training data, it would not be good for a
 public installation, as we can not predict user movements.
+
+This is also important for the type of input. The AIST++ data set contains both COCO
+and SMPL keypoint data. The COCO keypoints are 3D position based, while the SMPL paramter
+data are not. To produce SMPL parameter data on the fly is incredibly challenging and takes a long time to fit. Which means it will not work with a real-time interaction framework.
+
+Most dance AI models like to use the SMPL parameters to train. If an AI model wants to fit
+the use of a real-time interaction framework, it would work better with COCO format, or SMPL
+keypoint position rather than the axis angle rotational format that SMPL paramters take.
 
 \section{Procedures}
 % what AI agents you’ve explored so far, main training set and characteristics of each
@@ -190,6 +203,6 @@ On the Unity's side, a game manager records the user's input at 60FPS and ships 
 
 The final design of the Unity scene was set up with the user's skeletal mesh and the AI agent's skeletal mesh side by side. The reson for showing the user's own mesh is to show the user their input in terms of the motion capturing. The scene used a wooden floor and a black background to mimic a stage scene, and to provide the user with a more simple and pleasing scene.
 
-\section
+\section{}
 
 \end{document}
