@@ -120,7 +120,7 @@ def eval(weight_path: str, music_path: str, dance_path: str, out_dir: str):
         mnet.eval()
         print(t_music.shape, t_dance.shape, noise.shape, genre.shape)
         gen_dance = mnet.inference(t_music, t_dance, noise, genre)
-        render_video(gen_dance, smpl, out_dir, music_path)
+        render_video(gen_dance[:, :300, :], smpl, out_dir, music_path)
 
 
 def main(weight_path: str, music_path: str, dance_path: str, out_dir: str):
