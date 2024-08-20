@@ -176,3 +176,4 @@ cython_debug/
 *.npy
 *.mp4
 *.npz
+*.ckpt
