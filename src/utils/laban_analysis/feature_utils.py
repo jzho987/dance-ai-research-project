@@ -1,5 +1,6 @@
 import polars as pl
 import numpy as np
+import shapely
 
 def magnitude(col: pl.Expr) -> pl.Expr: 
     squared = col.arr.get(0).pow(2) + col.arr.get(1).pow(2) + col.arr.get(2).pow(2)
@@ -7,7 +8,7 @@ def magnitude(col: pl.Expr) -> pl.Expr:
     return mag
 
 
-def features_from_df(df: pl.DataFrame) -> pl.DataFrame:
+def features_from_df(df: pl.DataFrame, sum_cols: list[str] = None) -> pl.DataFrame:
     cols = df.columns
     cols.remove("i_time")
     out_df = df.group_by_dynamic("i_time", every="1i", period="35i").agg(
@@ -17,23 +18,68 @@ def features_from_df(df: pl.DataFrame) -> pl.DataFrame:
         pl.col("i_grouped"),
     )
     for col in cols:
-        agg_df = df.group_by_dynamic("i_time", every="1i", period="35i").agg(
-            pl.col(col).min().alias(f'min_{col}'),
-            pl.col(col).max().alias(f'max_{col}'),
-            pl.col(col).mean().alias(f'mean_{col}'),
-            pl.col(col).std().alias(f'std_{col}'),
-        ).select(
-            pl.col(f'min_{col}'),
-            pl.col(f'max_{col}'),
-            pl.col(f'mean_{col}'),
-            pl.col(f'std_{col}'),
-        )
+        if sum_cols is not None and col in sum_cols:
+            agg_df = df.group_by_dynamic("i_time", every="1i", period="35i").agg(
+                pl.col(col).sum().alias(f'num_{col}'),
+            ).select(
+                pl.col(f'num_{col}')
+            )
+        else:
+            agg_df = df.group_by_dynamic("i_time", every="1i", period="35i").agg(
+                pl.col(col).min().alias(f'min_{col}'),
+                pl.col(col).max().alias(f'max_{col}'),
+                pl.col(col).mean().alias(f'mean_{col}'),
+                pl.col(col).std().alias(f'std_{col}'),
+            ).select(
+                pl.col(f'min_{col}'),
+                pl.col(f'max_{col}'),
+                pl.col(f'mean_{col}'),
+                pl.col(f'std_{col}'),
+            )
         out_df = out_df.hstack(agg_df)
     out_df = out_df.filter(
         pl.col("i_grouped").list.len() >= 35
     ).drop("i_grouped")
     
     return out_df
+
+
+def calculate_space_component(df: pl.DataFrame) -> pl.DataFrame:
+    pc_df = df.with_columns(
+        pelvis_x = pl.col("Pelvis").arr.get(0),
+        pelvis_z = pl.col("Pelvis").arr.get(2),
+    )
+    pc_df = pc_df.with_columns(
+        pelvis_x_diff = pl.col("pelvis_x").diff(),
+        pelvis_z_diff = pl.col("pelvis_z").diff(),
+    )
+    pc_df = pc_df.with_columns(
+        mag_f26 = (pl.col("pelvis_x_diff").pow(2) + pl.col("pelvis_z_diff").pow(2)).sqrt(),
+        i_time = pl.col("i_time")
+    )
+    pc_df = pc_df.group_by_dynamic("i_time", every="1i", period="35i").agg(
+        f26 = pl.sum("mag_f26"),
+        pelvis_x_list = pl.col("pelvis_x"),
+        pelvis_z_list = pl.col("pelvis_z"),
+    ).filter(
+        pl.col("pelvis_x_list").list.len() >= 35
+    )
+    x_list = pc_df["pelvis_x_list"].to_list()
+    z_list = pc_df["pelvis_z_list"].to_list()
+    areas = []
+    for x, z in zip(x_list, z_list):
+        points = list(zip(x, z))
+        area = shapely.Polygon(points).area
+        areas.append(area)
+    area_df = pl.DataFrame({"area": areas, "i_time": range(len(areas))})
+    pc_df = pc_df.join(area_df, on="i_time", how="inner")
+    pc_df = pc_df.select(
+        f26 = pl.col("f26"),   
+        f27 = pl.col("area"),
+        i_time = pl.col("i_time")
+    )
+    
+    return pc_df
 
 
 def calculate_shape_component(df: pl.DataFrame) -> pl.DataFrame:
@@ -108,10 +154,12 @@ def calculate_shape_component(df: pl.DataFrame) -> pl.DataFrame:
         f22 = (pl.col("f22_max_x") - pl.col("f22_min_x")) * (pl.col("f22_max_y") - pl.col("f22_min_y")) * (pl.col("f22_max_z") - pl.col("f22_min_z")),
         f23 = (pl.col("f23_max_x") - pl.col("f23_min_x")) * (pl.col("f23_max_y") - pl.col("f23_min_y")) * (pl.col("f23_max_z") - pl.col("f23_min_z")),
         f24 = (pl.col("vec_f24_x").pow(2) + pl.col("vec_f24_y").pow(2) + pl.col("vec_f24_z").pow(2)).sqrt(),
-        f25 = pl.when(pl.col("avg_hand_y") > pl.col("Head_y")).then(pl.lit(0.2)).when(pl.col("avg_hand_y") < pl.col("Pelvis_y")).then(pl.lit(0)).otherwise(pl.lit(0.1)),
+        f25_0 = pl.when(pl.col("avg_hand_y") > pl.col("Head_y")).then(pl.lit(1)).otherwise(0),
+        f25_1 = pl.when(pl.col("avg_hand_y") < pl.col("Pelvis_y")).then(pl.lit(1)).otherwise(0),
+        f25_2 = pl.when((pl.col("avg_hand_y") <= pl.col("Head_y")) & (pl.col("avg_hand_y") >= pl.col("Pelvis_y"))).then(pl.lit(1)).otherwise(0),
         i_time = pl.col("i_time")
     )
-    out_df = features_from_df(sc_df)
+    out_df = features_from_df(sc_df, ["f25_0", "f25_1", "f25_2"])
 
     return out_df
 
@@ -215,9 +263,24 @@ def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
         f17 = pl.col("f17"),
         i_time = pl.col("i_time"),
     )
-    out_df = features_from_df(ec_df)
+    out_df = features_from_df(ec_df, ["f10"])
+    out_df = out_df.drop(
+        pl.col("mean_f11"),
+        pl.col("mean_f12"),
+        pl.col("mean_f13"),
+        pl.col("mean_f14"),
+        pl.col("mean_f15"),
+        pl.col("mean_f16"),
+        pl.col("mean_f17"),
+        pl.col("min_f14"),
+        pl.col("min_f15"),
+        pl.col("min_f16"),
+        pl.col("min_f17"),
+    )
 
     return out_df
+
+
 def calculate_body_component(df: pl.DataFrame) -> pl.DataFrame:
     bc_df = df.with_columns(
         vec_lf1 = (pl.col("LFoot") - pl.col("LHip")),

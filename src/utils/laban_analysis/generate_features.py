@@ -2,7 +2,7 @@ import pickle as pkl
 import numpy as np
 import polars as pl
 import json
-from feature_utils import calculate_body_component, calculate_effort_component, calculate_shape_component
+from feature_utils import calculate_body_component, calculate_effort_component, calculate_shape_component, calculate_space_component
 
 import matplotlib.pyplot as plt
 from sklearn.manifold import Isomap
@@ -77,7 +77,7 @@ def main(input_file: str, is_json: bool):
             data = json.loads(f.read())
         else:
             data = pkl.loads(f.read())
-    data = np.array(data)
+    data = np.array(data["result"])
     data = data.reshape(-1, 24, 3)
     df_dict = {}
     for key in JOINT_MAP:
@@ -88,10 +88,23 @@ def main(input_file: str, is_json: bool):
     bc_df = calculate_body_component(df.clone())
     ec_df = calculate_effort_component(df.clone())
     sc_df = calculate_shape_component(df.clone())
+    pc_df = calculate_space_component(df.clone())
     print("body component", bc_df)
     print("effort component", ec_df)
     print("shape component", sc_df)
-    plot_polars_dataframe(sc_df)
+    print("space component", pc_df)
+    laban_df = bc_df.join(
+            ec_df, on="i_time", how="inner"
+        ).join(
+            sc_df, on="i_time", how="inner"
+        ).join(
+            pc_df, on="i_time", how="inner"
+        )
+    print(laban_df.columns)
+    print(laban_df)
+    plot_polars_dataframe(laban_df)
+    laban_df = laban_df.drop(pl.col("i_time"))
+    plot_isomap(laban_df)
 
 
 if __name__ == "__main__":
