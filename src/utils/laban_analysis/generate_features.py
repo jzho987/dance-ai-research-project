@@ -90,7 +90,8 @@ def main(input_file: str, is_json: bool):
     sc_df = calculate_shape_component(df.clone())
     print("body component", bc_df)
     print("effort component", ec_df)
-    plot_polars_dataframe(ec_df)
+    print("shape component", sc_df)
+    plot_polars_dataframe(sc_df)
 
 
 if __name__ == "__main__":

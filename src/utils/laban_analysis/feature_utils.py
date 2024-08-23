@@ -7,13 +7,6 @@ def magnitude(col: pl.Expr) -> pl.Expr:
     return mag
 
 
-def cross(lhs, rhs) -> pl.Expr:
-    lhs = np.array(lhs)
-    rhs = np.array(rhs)
-    print(lhs, rhs)
-    # return np.cross(lhs_ls, rhs_ls)
-
-
 def features_from_df(df: pl.DataFrame) -> pl.DataFrame:
     cols = df.columns
     cols.remove("i_time")
@@ -44,13 +37,83 @@ def features_from_df(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def calculate_shape_component(df: pl.DataFrame) -> pl.DataFrame:
-    sc_df = df.explode(
-        pl.exclude("i_time")
-    ).with_row_index().with_columns(
-        pl.lit("Pelvis") + "_" + pl.col("index").mod(3).cast(pl.Utf8).alias("column")
+    cols = df.columns
+    cols.remove("i_time")
+    sc_df = df.select(
+        pl.col("i_time")
     )
-    print(sc_df)
-    exit()
+    for col in cols:
+        extracted_df = df.select(
+            pl.col(col).arr.get(0).alias(f'{col}_x'),
+            pl.col(col).arr.get(1).alias(f'{col}_y'),
+            pl.col(col).arr.get(2).alias(f'{col}_z'),
+        )    
+        sc_df = sc_df.hstack(extracted_df)
+    print(sc_df.columns)
+    sc_df = sc_df.with_columns(
+        f18_max_x = pl.max_horizontal("Head_x", "LHand_x", "RHand_x", "LFoot_x", "RFoot_x"),
+        f18_max_y = pl.max_horizontal("Head_y", "LHand_y", "RHand_y", "LFoot_y", "RFoot_y"),
+        f18_max_z = pl.max_horizontal("Head_z", "LHand_z", "RHand_z", "LFoot_z", "RFoot_z"),
+        f18_min_x = pl.min_horizontal("Head_x", "LHand_x", "RHand_x", "LFoot_x", "RFoot_x"),
+        f18_min_y = pl.min_horizontal("Head_y", "LHand_y", "RHand_y", "LFoot_y", "RFoot_y"),
+        f18_min_z = pl.min_horizontal("Head_z", "LHand_z", "RHand_z", "LFoot_z", "RFoot_z"),
+
+        f19_max_x = pl.max_horizontal(pl.selectors.ends_with("_x")),
+        f19_max_y = pl.max_horizontal(pl.selectors.ends_with("_y")),
+        f19_max_z = pl.max_horizontal(pl.selectors.ends_with("_z")),
+        f19_min_x = pl.min_horizontal(pl.selectors.ends_with("_x")),
+        f19_min_y = pl.min_horizontal(pl.selectors.ends_with("_y")),
+        f19_min_z = pl.min_horizontal(pl.selectors.ends_with("_z")),
+
+        f20_max_x = pl.max_horizontal("Head_x", "Neck_x", "LShoulder_x", "RShoulder_x", "LCollar_x", "RCollar_x", "LElbow_x", "RElbow_x", "LWrist_x", "RWrist_x", "LHand_x", "RHand_x", "spine3_x", "spine2_x", "spine1_x"),
+        f20_max_y = pl.max_horizontal("Head_y", "Neck_y", "LShoulder_y", "RShoulder_y", "LCollar_y", "RCollar_y", "LElbow_y", "RElbow_y", "LWrist_y", "RWrist_y", "LHand_y", "RHand_y", "spine3_y", "spine2_y", "spine1_y"),
+        f20_max_z = pl.max_horizontal("Head_z", "Neck_z", "LShoulder_z", "RShoulder_z", "LCollar_z", "RCollar_z", "LElbow_z", "RElbow_z", "LWrist_z", "RWrist_z", "LHand_z", "RHand_z", "spine3_z", "spine2_z", "spine1_z"),
+        f20_min_x = pl.min_horizontal("Head_x", "Neck_x", "LShoulder_x", "RShoulder_x", "LCollar_x", "RCollar_x", "LElbow_x", "RElbow_x", "LWrist_x", "RWrist_x", "LHand_x", "RHand_x", "spine3_x", "spine2_x", "spine1_x"),
+        f20_min_y = pl.min_horizontal("Head_y", "Neck_y", "LShoulder_y", "RShoulder_y", "LCollar_y", "RCollar_y", "LElbow_y", "RElbow_y", "LWrist_y", "RWrist_y", "LHand_y", "RHand_y", "spine3_y", "spine2_y", "spine1_y"),
+        f20_min_z = pl.min_horizontal("Head_z", "Neck_z", "LShoulder_z", "RShoulder_z", "LCollar_z", "RCollar_z", "LElbow_z", "RElbow_z", "LWrist_z", "RWrist_z", "LHand_z", "RHand_z", "spine3_z", "spine2_z", "spine1_z"),
+
+        f21_max_x = pl.max_horizontal("Pelvis_x", "LHip_x", "RHip_x", "LKnee_x", "RKnee_x", "LAnkle_x", "RAnkle_x", "LFoot_x", "RFoot_x"),
+        f21_max_y = pl.max_horizontal("Pelvis_y", "LHip_y", "RHip_y", "LKnee_y", "RKnee_y", "LAnkle_y", "RAnkle_y", "LFoot_y", "RFoot_y"),
+        f21_max_z = pl.max_horizontal("Pelvis_z", "LHip_z", "RHip_z", "LKnee_z", "RKnee_z", "LAnkle_z", "RAnkle_z", "LFoot_z", "RFoot_z"),
+        f21_min_x = pl.min_horizontal("Pelvis_x", "LHip_x", "RHip_x", "LKnee_x", "RKnee_x", "LAnkle_x", "RAnkle_x", "LFoot_x", "RFoot_x"),
+        f21_min_y = pl.min_horizontal("Pelvis_y", "LHip_y", "RHip_y", "LKnee_y", "RKnee_y", "LAnkle_y", "RAnkle_y", "LFoot_y", "RFoot_y"),
+        f21_min_z = pl.min_horizontal("Pelvis_z", "LHip_z", "RHip_z", "LKnee_z", "RKnee_z", "LAnkle_z", "RAnkle_z", "LFoot_z", "RFoot_z"),
+
+        f22_max_x = pl.max_horizontal(pl.selectors.starts_with("R") & pl.selectors.ends_with("_x"), "Head_x", "spine3_x", "spine2_x", "spine1_x", "Pelvis_x"),
+        f22_max_y = pl.max_horizontal(pl.selectors.starts_with("R") & pl.selectors.ends_with("_y"), "Head_y", "spine3_y", "spine2_y", "spine1_y", "Pelvis_y"),
+        f22_max_z = pl.max_horizontal(pl.selectors.starts_with("R") & pl.selectors.ends_with("_z"), "Head_z", "spine3_z", "spine2_z", "spine1_z", "Pelvis_z"),
+        f22_min_x = pl.min_horizontal(pl.selectors.starts_with("R") & pl.selectors.ends_with("_x"), "Head_x", "spine3_x", "spine2_x", "spine1_x", "Pelvis_x"),
+        f22_min_y = pl.min_horizontal(pl.selectors.starts_with("R") & pl.selectors.ends_with("_y"), "Head_y", "spine3_y", "spine2_y", "spine1_y", "Pelvis_y"),
+        f22_min_z = pl.min_horizontal(pl.selectors.starts_with("R") & pl.selectors.ends_with("_z"), "Head_z", "spine3_z", "spine2_z", "spine1_z", "Pelvis_z"),
+
+        f23_max_x = pl.max_horizontal(pl.selectors.starts_with("L") & pl.selectors.ends_with("_x"), "Head_x", "spine3_x", "spine2_x", "spine1_x", "Pelvis_x"),
+        f23_max_y = pl.max_horizontal(pl.selectors.starts_with("L") & pl.selectors.ends_with("_y"), "Head_y", "spine3_y", "spine2_y", "spine1_y", "Pelvis_y"),
+        f23_max_z = pl.max_horizontal(pl.selectors.starts_with("L") & pl.selectors.ends_with("_z"), "Head_z", "spine3_z", "spine2_z", "spine1_z", "Pelvis_z"),
+        f23_min_x = pl.min_horizontal(pl.selectors.starts_with("L") & pl.selectors.ends_with("_x"), "Head_x", "spine3_x", "spine2_x", "spine1_x", "Pelvis_x"),
+        f23_min_y = pl.min_horizontal(pl.selectors.starts_with("L") & pl.selectors.ends_with("_y"), "Head_y", "spine3_y", "spine2_y", "spine1_y", "Pelvis_y"),
+        f23_min_z = pl.min_horizontal(pl.selectors.starts_with("L") & pl.selectors.ends_with("_z"), "Head_z", "spine3_z", "spine2_z", "spine1_z", "Pelvis_z"),
+
+        vec_f24_x = pl.col("Head_x") - pl.col("Pelvis_x"),
+        vec_f24_y = pl.col("Head_y") - pl.col("Pelvis_y"),
+        vec_f24_z = pl.col("Head_z") - pl.col("Pelvis_z"),
+
+        avg_hand_y = pl.mean_horizontal("RHand_y", "LHand_y"),
+    )
+    print(sc_df.select(pl.selectors.starts_with("R") & pl.selectors.ends_with("_x"), "Head_x").columns)
+    sc_df = sc_df.select(
+        f18 = (pl.col("f18_max_x") - pl.col("f18_min_x")) * (pl.col("f18_max_y") - pl.col("f18_min_y")) * (pl.col("f18_max_z") - pl.col("f18_min_z")),
+        f19 = (pl.col("f19_max_x") - pl.col("f19_min_x")) * (pl.col("f19_max_y") - pl.col("f19_min_y")) * (pl.col("f19_max_z") - pl.col("f19_min_z")),
+        f20 = (pl.col("f20_max_x") - pl.col("f20_min_x")) * (pl.col("f20_max_y") - pl.col("f20_min_y")) * (pl.col("f20_max_z") - pl.col("f20_min_z")),
+        f21 = (pl.col("f21_max_x") - pl.col("f21_min_x")) * (pl.col("f21_max_y") - pl.col("f21_min_y")) * (pl.col("f21_max_z") - pl.col("f21_min_z")),
+        f22 = (pl.col("f22_max_x") - pl.col("f22_min_x")) * (pl.col("f22_max_y") - pl.col("f22_min_y")) * (pl.col("f22_max_z") - pl.col("f22_min_z")),
+        f23 = (pl.col("f23_max_x") - pl.col("f23_min_x")) * (pl.col("f23_max_y") - pl.col("f23_min_y")) * (pl.col("f23_max_z") - pl.col("f23_min_z")),
+        f24 = (pl.col("vec_f24_x").pow(2) + pl.col("vec_f24_y").pow(2) + pl.col("vec_f24_z").pow(2)).sqrt(),
+        f25 = pl.when(pl.col("avg_hand_y") > pl.col("Head_y")).then(pl.lit(0.2)).when(pl.col("avg_hand_y") < pl.col("Pelvis_y")).then(pl.lit(0)).otherwise(pl.lit(0.1)),
+        i_time = pl.col("i_time")
+    )
+    out_df = features_from_df(sc_df)
+
+    return out_df
 
 
 def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
@@ -154,9 +217,7 @@ def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
     )
     out_df = features_from_df(ec_df)
 
-    return ec_df
-
-
+    return out_df
 def calculate_body_component(df: pl.DataFrame) -> pl.DataFrame:
     bc_df = df.with_columns(
         vec_lf1 = (pl.col("LFoot") - pl.col("LHip")),
