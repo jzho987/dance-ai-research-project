@@ -20,7 +20,7 @@ def features_from_df(df: pl.DataFrame, sum_cols: list[str] = None) -> pl.DataFra
     for col in cols:
         if sum_cols is not None and col in sum_cols:
             agg_df = df.group_by_dynamic("i_time", every="1i", period="35i").agg(
-                pl.col(col).sum().alias(f'num_{col}'),
+                pl.col(col).mean().alias(f'num_{col}'),
             ).select(
                 pl.col(f'num_{col}')
             )
@@ -58,7 +58,7 @@ def calculate_space_component(df: pl.DataFrame) -> pl.DataFrame:
         i_time = pl.col("i_time")
     )
     pc_df = pc_df.group_by_dynamic("i_time", every="1i", period="35i").agg(
-        f26 = pl.sum("mag_f26"),
+        f26 = pl.mean("mag_f26"),
         pelvis_x_list = pl.col("pelvis_x"),
         pelvis_z_list = pl.col("pelvis_z"),
     ).filter(

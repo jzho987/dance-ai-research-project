@@ -2,12 +2,14 @@ import pickle as pkl
 import numpy as np
 import polars as pl
 import json
-from feature_utils import calculate_body_component, calculate_effort_component, calculate_shape_component, calculate_space_component
+import os
 
+import argparse
 import matplotlib.pyplot as plt
 from sklearn.manifold import Isomap
 
-import argparse
+from feature_utils import calculate_body_component, calculate_effort_component, calculate_shape_component, calculate_space_component
+
 
 JOINT_MAP = {
 'Pelvis': 0,
@@ -37,11 +39,11 @@ JOINT_MAP = {
 }
 
 
-def plot_isomap(np_data):
+def plot_isomap(np_data, save_path: str=None):
     # Initialize Isomap and fit the model
-    n_neighbors = 10
+    n_neighbors = 30
     n_components = 2
-    isomap = Isomap(n_neighbors=n_neighbors, n_components=n_components)
+    isomap = Isomap(n_neighbors=n_neighbors, n_components=n_components, eigen_solver="auto")
     X_isomap = isomap.fit_transform(np_data)
 
     # Plot the results
@@ -49,7 +51,11 @@ def plot_isomap(np_data):
     plt.scatter(X_isomap[:, 0], X_isomap[:, 1], c=np_data[:, 0], cmap=plt.cm.viridis)
     plt.title("Isomap Visualization")
     plt.colorbar()
-    plt.show()
+    # NOTE: this checks if the string is None.
+    if not save_path: 
+        plt.show()
+    else:
+        plt.savefig(save_path)
 
 
 def plot_polars_dataframe(df: pl.DataFrame):
@@ -77,7 +83,10 @@ def main(input_file: str, is_json: bool):
             data = json.loads(f.read())
         else:
             data = pkl.loads(f.read())
-    data = np.array(data["result"])
+    if type(data) is dict:
+        print("processing as dictionary")
+        data = data["result"]
+    data = np.array(data)
     data = data.reshape(-1, 24, 3)
     df_dict = {}
     for key in JOINT_MAP:
@@ -89,22 +98,47 @@ def main(input_file: str, is_json: bool):
     ec_df = calculate_effort_component(df.clone())
     sc_df = calculate_shape_component(df.clone())
     pc_df = calculate_space_component(df.clone())
+
     print("body component", bc_df)
     print("effort component", ec_df)
     print("shape component", sc_df)
     print("space component", pc_df)
-    laban_df = bc_df.join(
-            ec_df, on="i_time", how="inner"
-        ).join(
-            sc_df, on="i_time", how="inner"
-        ).join(
-            pc_df, on="i_time", how="inner"
-        )
+
+    laban_df = bc_df.join(ec_df, on="i_time", how="inner"
+        ).join(sc_df, on="i_time", how="inner"
+        ).join(pc_df, on="i_time", how="inner")
+
     print(laban_df.columns)
     print(laban_df)
-    plot_polars_dataframe(laban_df)
+    # plot_polars_dataframe(bc_df)
+    # plot_polars_dataframe(ec_df)
+    # plot_polars_dataframe(sc_df)
+    # plot_polars_dataframe(pc_df)
+    # plot_polars_dataframe(laban_df)
+    bc_df = bc_df.drop(pl.col("i_time"))
+    ec_df = ec_df.drop(pl.col("i_time"))
+    sc_df = sc_df.drop(pl.col("i_time"))
+    pc_df = pc_df.drop(pl.col("i_time"))
     laban_df = laban_df.drop(pl.col("i_time"))
-    plot_isomap(laban_df)
+
+    # path
+    basename = os.path.basename(input_file)
+    basename = basename.split(".")[0]
+
+    # store dataframe
+    if not os.path.exists("./out") or not os.path.isdir("./out"):
+        os.makedirs("./out")
+    laban_df.write_parquet(f'./out/{basename}.parquet')
+    
+    # store output images
+    base_img_path = f'./img/{basename}'
+    if not os.path.exists(base_img_path) or not os.path.isdir(base_img_path):
+        os.makedirs(base_img_path)
+    plot_isomap(bc_df, f'{base_img_path}/body.png')
+    plot_isomap(ec_df, f'{base_img_path}/effort.png')
+    plot_isomap(sc_df, f'{base_img_path}/shape.png')
+    plot_isomap(pc_df, f'{base_img_path}/space.png')
+    plot_isomap(laban_df, f'{base_img_path}/all.png')
 
 
 if __name__ == "__main__":
