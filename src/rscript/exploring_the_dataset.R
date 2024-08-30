@@ -2,7 +2,6 @@
 
 library(jsonlite)
 library(ggplot2)
-library(dplyr)
 
 # loading
 data <- fromJSON("data/empty_generated_0_shift_28.json")
