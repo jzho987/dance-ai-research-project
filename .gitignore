@@ -1,6 +1,3 @@
-# RStudio command line history
-src/rscript/.Rhistory
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
