@@ -1,0 +1,12 @@
+name: visualization_tool
+title: visualization_tool
+username: jxav258
+account: jxav258
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12568422
+bundleId: 9044498
+url: https://jxav258.shinyapps.io/visualization_tool/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
