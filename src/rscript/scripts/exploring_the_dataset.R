@@ -4,7 +4,7 @@ library(jsonlite)
 library(ggplot2)
 
 # loading
-data <- fromJSON("data/empty_generated_0_shift_28.json")
+data <- fromJSON("data/raw/empty_generated_0_shift_28.json")
 
 # unpacking
 result <- as.data.frame(data$result) # this contains all the values
