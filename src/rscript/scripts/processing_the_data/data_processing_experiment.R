@@ -1,0 +1,33 @@
+# An experiment to figure out how to process the data
+
+library(jsonlite)
+
+json_data <- fromJSON("data/raw/empty_generated_0_shift_28.json")
+data <- json_data[["result"]]
+
+# Number of iterations (rows)
+n_iterations <- nrow(data)
+
+# Number of coordinates per iteration
+n_coords_per_iteration <- ncol(data) / 3
+
+# Initialize vectors to store data
+iteration <- rep(1:n_iterations, each = n_coords_per_iteration)
+coord_index <- rep(1:n_coords_per_iteration, times = n_iterations)
+x <- numeric()
+y <- numeric()
+z <- numeric()
+
+# Loop through the matrix and extract x, y, z values
+for (i in 1:n_iterations) {
+  x <- c(x, data[i, seq(1, ncol(data), by = 3)])
+  y <- c(y, data[i, seq(2, ncol(data), by = 3)])
+  z <- c(z, data[i, seq(3, ncol(data), by = 3)])
+}
+
+# Combine into a data frame
+df <- data.frame(Iteration = iteration, Coord_Index = coord_index, X = x, Y = y, Z = z)
+
+# Print the data frame
+print(df)
+
