@@ -1,6 +1,5 @@
 # Contains all the functions used to derive metrics
-# Updated it to meet the new requirements
-# Do source("scripts/calculating_metrics/metric_functions_v2.0.R") to use
+# Updated to calculate min and max values
 
 library(dplyr)
 
@@ -10,7 +9,9 @@ calculate_average_height <- function(df) {
     group_by(Coord_Index) %>%
     summarise(
       average_height = mean(Y, na.rm = TRUE),
-      sd_height = sd(Y, na.rm = TRUE)
+      sd_height = sd(Y, na.rm = TRUE),
+      min_height = min(Y, na.rm = TRUE),
+      max_height = max(Y, na.rm = TRUE)
     )
 }
 
@@ -35,7 +36,9 @@ calculate_average_velocity <- function(df) {
     group_by(Coord_Index) %>%
     summarise(
       avg_velocity_magnitude = mean(velocity_magnitude, na.rm = TRUE),
-      sd_velocity_magnitude = sd(velocity_magnitude, na.rm = TRUE)
+      sd_velocity_magnitude = sd(velocity_magnitude, na.rm = TRUE),
+      min_velocity_magnitude = min(velocity_magnitude, na.rm = TRUE),
+      max_velocity_magnitude = max(velocity_magnitude, na.rm = TRUE)
     )
 }
 
@@ -73,7 +76,9 @@ calculate_average_acceleration <- function(df) {
     group_by(Coord_Index) %>%
     summarise(
       avg_acceleration_magnitude = mean(acceleration_magnitude, na.rm = TRUE),
-      sd_acceleration_magnitude = sd(acceleration_magnitude, na.rm = TRUE)
+      sd_acceleration_magnitude = sd(acceleration_magnitude, na.rm = TRUE),
+      min_acceleration_magnitude = min(acceleration_magnitude, na.rm = TRUE),
+      max_acceleration_magnitude = max(acceleration_magnitude, na.rm = TRUE)
     )
 }
 
