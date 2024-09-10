@@ -1,5 +1,8 @@
 # Contains all the functions used to derive metrics
-# Do source("scripts/calculating_metrics/metric_functions.R") to use
+# Updated it to meet the new requirements
+# Do source("scripts/calculating_metrics/metric_functions_v2.0.R") to use
+
+library(dplyr)
 
 # average height ----------------------------------------------------------
 calculate_average_height <- function(df) {
