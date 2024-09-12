@@ -2,7 +2,7 @@
 
 # Define the directory to loop through
 DIRECTORY=$1
-MUSIC=$2
+VIDEODIR=$DIRECTORY-out
 
 # Loop through each file in the directory
 for FILE in "$DIRECTORY"/*; do
@@ -10,6 +10,6 @@ for FILE in "$DIRECTORY"/*; do
   if [ -f "$FILE" ]; then
     BASENAME=$(basename "$FILE")
     RAWNAME="${BASENAME%.*}"
-    python main.py --pre --file $FILE --name $RAWNAME --music $MUSIC
+    python main.py --pre --file $FILE --name $RAWNAME --video_dir $VIDEODIR
   fi
 done

@@ -4,9 +4,8 @@ import numpy as np
 import json
 from matplotlib.animation import FuncAnimation
 
-with open("results3.json") as f:
+with open("output_variational_flipped/output_9.json") as f:
     keypoints_list = json.loads(f.read())
-    keypoints_list = keypoints_list['result']
 
 # Create a new figure for plotting
 fig = plt.figure()
@@ -40,11 +39,13 @@ def init():
     return sc, line
 
 def update(frame):
+    print(frame)
     """Update the animation."""
     keypoints = np.array(keypoints_list[frame]).reshape(-1, 3)
+    keypoints[:, 2] *= -1
     x = keypoints[:, 0]
-    y = keypoints[:, 1]
-    z = keypoints[:, 2]
+    y = keypoints[:, 2]
+    z = keypoints[:, 1]
 
     # Update scatter plot
     sc._offsets3d = (x, y, z)
@@ -54,13 +55,13 @@ def update(frame):
         text.remove()
     texts.clear()
     for i, (x_coord, y_coord, z_coord) in enumerate(keypoints):
-        text = ax.text(x_coord, y_coord, z_coord, '%d' % i, size=10, zorder=1, color='k')
+        text = ax.text(x_coord, z_coord, y_coord, '%d' % i, size=10, zorder=1, color='k')
         texts.append(text)
     
     return sc, line
 
 # Create the animation
-ani = FuncAnimation(fig, update, frames=len(keypoints_list), init_func=init, blit=False, interval=500)
+ani = FuncAnimation(fig, update, frames=len(keypoints_list), init_func=init, blit=False, interval=30)
 
 # Show the plot
 plt.show()

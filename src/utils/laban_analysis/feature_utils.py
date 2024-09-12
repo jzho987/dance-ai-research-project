@@ -11,6 +11,24 @@ def magnitude(col: pl.Expr) -> pl.Expr:
 def features_from_df(df: pl.DataFrame, sum_cols: list[str] = None) -> pl.DataFrame:
     cols = df.columns
     cols.remove("i_time")
+    out_dict = {}
+    for col in cols:
+        min = df.min()[col]
+        max = df.max()[col]
+        std = df.std()[col]
+        mean = df.mean()[col]
+        out_dict[f'{col}_min'] = min
+        out_dict[f'{col}_max'] = max
+        out_dict[f'{col}_std'] = std
+        out_dict[f'{col}_mean'] = mean
+    out_df = pl.from_dict(out_dict)
+    
+    return out_df
+
+
+def features_from_df_over_time(df: pl.DataFrame, sum_cols: list[str] = None) -> pl.DataFrame:
+    cols = df.columns
+    cols.remove("i_time")
     out_df = df.group_by_dynamic("i_time", every="1i", period="35i").agg(
         i_grouped = pl.col("i_time"),
     ).select(
@@ -44,6 +62,9 @@ def features_from_df(df: pl.DataFrame, sum_cols: list[str] = None) -> pl.DataFra
     return out_df
 
 
+# NOTE: the space component does not use the standard aggregation
+# that other components use. The format is standardized so a tuple
+# will be returned just like the other component functions.
 def calculate_space_component(df: pl.DataFrame) -> pl.DataFrame:
     pc_df = df.with_columns(
         pelvis_x = pl.col("Pelvis").arr.get(0),
@@ -78,8 +99,9 @@ def calculate_space_component(df: pl.DataFrame) -> pl.DataFrame:
         f27 = pl.col("area"),
         i_time = pl.col("i_time")
     )
+    out_df = features_from_df(pc_df)
     
-    return pc_df
+    return out_df
 
 
 def calculate_shape_component(df: pl.DataFrame) -> pl.DataFrame:
@@ -95,7 +117,6 @@ def calculate_shape_component(df: pl.DataFrame) -> pl.DataFrame:
             pl.col(col).arr.get(2).alias(f'{col}_z'),
         )    
         sc_df = sc_df.hstack(extracted_df)
-    print(sc_df.columns)
     sc_df = sc_df.with_columns(
         f18_max_x = pl.max_horizontal("Head_x", "LHand_x", "RHand_x", "LFoot_x", "RFoot_x"),
         f18_max_y = pl.max_horizontal("Head_y", "LHand_y", "RHand_y", "LFoot_y", "RFoot_y"),
@@ -145,7 +166,6 @@ def calculate_shape_component(df: pl.DataFrame) -> pl.DataFrame:
 
         avg_hand_y = pl.mean_horizontal("RHand_y", "LHand_y"),
     )
-    print(sc_df.select(pl.selectors.starts_with("R") & pl.selectors.ends_with("_x"), "Head_x").columns)
     sc_df = sc_df.select(
         f18 = (pl.col("f18_max_x") - pl.col("f18_min_x")) * (pl.col("f18_max_y") - pl.col("f18_min_y")) * (pl.col("f18_max_z") - pl.col("f18_min_z")),
         f19 = (pl.col("f19_max_x") - pl.col("f19_min_x")) * (pl.col("f19_max_y") - pl.col("f19_min_y")) * (pl.col("f19_max_z") - pl.col("f19_min_z")),
@@ -169,6 +189,9 @@ def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
         pelvis_x = pl.col("Pelvis").arr.get(0),
         pelvis_y = pl.col("Pelvis").arr.get(1),
         pelvis_z = pl.col("Pelvis").arr.get(2),
+        spine3_x = pl.col("spine3").arr.get(0),
+        spine3_y = pl.col("spine3").arr.get(1),
+        spine3_z = pl.col("spine3").arr.get(2),
         lhand_x = pl.col("LHand").arr.get(0),
         lhand_y = pl.col("LHand").arr.get(1),
         lhand_z = pl.col("LHand").arr.get(2),
@@ -186,6 +209,9 @@ def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
         diff_pelvis_x = pl.col("pelvis_x").diff(),
         diff_pelvis_y = pl.col("pelvis_y").diff(),
         diff_pelvis_z = pl.col("pelvis_z").diff(),
+        diff_spine3_x = pl.col("spine3_x").diff(),
+        diff_spine3_y = pl.col("spine3_y").diff(),
+        diff_spine3_z = pl.col("spine3_z").diff(),
         diff_lhand_x = pl.col("lhand_x").diff(),
         diff_lhand_y = pl.col("lhand_y").diff(),
         diff_lhand_z = pl.col("lhand_z").diff(),
@@ -199,29 +225,9 @@ def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
         diff_rfoot_y = pl.col("rfoot_y").diff(),
         diff_rfoot_z = pl.col("rfoot_z").diff(),
     )
-    head = np.array(df["Head"].to_list())
-    spine3 = np.array(df["spine3"].to_list())
-    lcollar = np.array(df["LCollar"].to_list())
-    rcollar = np.array(df["RCollar"].to_list())
-    up = head - spine3
-    left = lcollar - rcollar
-    head_direction = np.cross(left, up)[1:, :]
-    pelvis_vec_x = np.expand_dims(np.array(ec_df["diff_pelvis_x"].to_list()), axis=1)
-    pelvis_vec_y = np.expand_dims(np.array(ec_df["diff_pelvis_y"].to_list()), axis=1)
-    pelvis_vec_z = np.expand_dims(np.array(ec_df["diff_pelvis_z"].to_list()), axis=1)
-    root_direction = np.concatenate([pelvis_vec_x, pelvis_vec_y, pelvis_vec_z], axis=1).astype(float)[1:, :]
-    head_norms = np.linalg.norm(head_direction, axis=1).reshape(-1, 1)
-    norm_hd = head_direction / head_norms
-    root_norms = np.linalg.norm(root_direction, axis=1).reshape(-1, 1)
-    norm_rd = root_direction / root_norms
-    angles = []
-    for i in range(norm_hd.shape[0]):
-        angle = np.arccos(np.clip(np.dot(norm_hd[i], norm_rd[i]), -1.0, 1.0))
-        angles.append(angle)
-    angles_dict = {"angle": angles, "i_time": range(len(angles))}
-    angles_df = pl.DataFrame(angles_dict)
     ec_df = ec_df.with_columns(
         pelvis_dist = (pl.col("diff_pelvis_x").pow(2) + pl.col("diff_pelvis_y").pow(2) + pl.col("diff_pelvis_z").pow(2)).sqrt().abs(),
+        spine3_dist = (pl.col("diff_spine3_x").pow(2) + pl.col("diff_spine3_y").pow(2) + pl.col("diff_spine3_z").pow(2)).sqrt().abs(),
         lhand_dist = (pl.col("diff_lhand_x").pow(2) + pl.col("diff_lhand_y").pow(2) + pl.col("diff_lhand_z").pow(2)).sqrt().abs(),
         rhand_dist = (pl.col("diff_rhand_x").pow(2) + pl.col("diff_rhand_y").pow(2) + pl.col("diff_rhand_z").pow(2)).sqrt().abs(),
         lfoot_dist = (pl.col("diff_lfoot_x").pow(2) + pl.col("diff_lfoot_y").pow(2) + pl.col("diff_lfoot_z").pow(2)).sqrt().abs(),
@@ -229,31 +235,28 @@ def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
     )
     ec_df = ec_df.group_by_dynamic("i_time", every="1i", period="10i").agg(
         f11 = pl.mean("pelvis_dist"),
-        lf12 = pl.mean("lhand_dist"),
-        rf12 = pl.mean("rhand_dist"),
-        lf13 = pl.mean("lfoot_dist"),
-        rf13 = pl.mean("rfoot_dist"),
+        f12 = pl.mean("spine3_dist"),
+        lf13 = pl.mean("lhand_dist"),
+        rf13 = pl.mean("rhand_dist"),
+        lf14 = pl.mean("lfoot_dist"),
+        rf14 = pl.mean("rfoot_dist"),
     )
-    ec_df = ec_df.join(angles_df, on=pl.col("i_time"), how="inner")
     ec_df = ec_df.with_columns(
         accel = pl.col("f11").diff(),
-        f12 = pl.mean_horizontal("lf12", "rf12"),
         f13 = pl.mean_horizontal("lf13", "rf13"),
+        f14 = pl.mean_horizontal("lf14", "rf14"),
     )
     ec_df = ec_df.with_columns(
-        f10 = pl.when(pl.col("accel") < -0.00045).then(pl.lit(0.01)).otherwise(pl.lit(0)),
-        f14 = pl.col("f11").diff(),
-        f15 = pl.col("f12").diff(),
-        f16 = pl.col("f13").diff(),
-        f17 = pl.col("f11").diff().diff(),
+        f15 = pl.col("f11").diff(),
+        f16 = pl.col("f12").diff(),
+        f17 = pl.col("f13").diff(),
+        f18 = pl.col("f14").diff(),
+        f19 = pl.col("f11").diff().diff(),
     )
     ec_df = ec_df.filter(
-        pl.col("f10").is_not_null(),
         pl.col("f11").is_not_null(),
     )
     ec_df = ec_df.select(
-        f9 = pl.col("angle"),
-        f10 = pl.col("f10"),
         f11 = pl.col("f11"),
         f12 = pl.col("f12"),
         f13 = pl.col("f13"),
@@ -261,22 +264,11 @@ def calculate_effort_component(df: pl.DataFrame) -> pl.DataFrame:
         f15 = pl.col("f15"),
         f16 = pl.col("f16"),
         f17 = pl.col("f17"),
+        f18 = pl.col("f18"),
+        f19 = pl.col("f19"),
         i_time = pl.col("i_time"),
     )
-    out_df = features_from_df(ec_df, ["f10"])
-    out_df = out_df.drop(
-        pl.col("mean_f11"),
-        pl.col("mean_f12"),
-        pl.col("mean_f13"),
-        pl.col("mean_f14"),
-        pl.col("mean_f15"),
-        pl.col("mean_f16"),
-        pl.col("mean_f17"),
-        pl.col("min_f14"),
-        pl.col("min_f15"),
-        pl.col("min_f16"),
-        pl.col("min_f17"),
-    )
+    out_df = features_from_df(ec_df, [])
 
     return out_df
 

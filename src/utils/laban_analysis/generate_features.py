@@ -58,26 +58,28 @@ def plot_isomap(np_data, save_path: str=None):
         plt.savefig(save_path)
 
 
-def plot_polars_dataframe(df: pl.DataFrame):
-    fig, ax = plt.subplots(figsize=(12, 8))
-    df_dict = df.to_dict()
-    i_time = df_dict["i_time"]
-    df_dict.pop("i_time")
-
-    for key in df_dict:
-        col = df_dict[key]
-        ax.plot(i_time, col, label=f'{key}')
-
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Value')
-    ax.set_title('Laban Quantitative Analysis')
-    ax.legend()
+def plot_polars_dataframe(dfs: list[pl.DataFrame]):
+    df_dicts = []
+    for df in dfs:
+        df_dict = df.to_dict()
+        i_time = df_dict["i_time"]
+        df_dict.pop("i_time")
+        df_dicts.append(df_dict)
+        keys = df_dict.keys()
+    
+    fig, axs = plt.subplots(nrows = len(keys))
+    for ax, key in zip(axs, keys):
+        for df_dict in df_dicts:
+            ax.plot(i_time, df_dict[key], label=f'{key}')
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Value')
+        ax.set_title('Laban Quantitative Analysis')
+        ax.legend()
     plt.tight_layout()
     plt.show()
 
 
-
-def main(input_file: str, is_json: bool):
+def main(input_file: str, is_json: bool) -> pl.DataFrame:
     with open(input_file, 'r' if is_json else 'rb') as f:
         if is_json:
             data = json.loads(f.read())
@@ -94,52 +96,18 @@ def main(input_file: str, is_json: bool):
         df_dict[key] = data[:, index, :]
     df_dict["i_time"] = range(data.shape[0])
     df = pl.DataFrame(df_dict)
-    bc_df = calculate_body_component(df.clone())
-    ec_df = calculate_effort_component(df.clone())
-    sc_df = calculate_shape_component(df.clone())
-    pc_df = calculate_space_component(df.clone())
+    bc_agg_df = calculate_body_component(df.clone())
+    ec_agg_df = calculate_effort_component(df.clone())
+    pc_agg_df = calculate_space_component(df.clone())
+    basename = os.path.basename(input_file).split(".")[0]
+    name_dict = {"name": [basename]}
+    name_df = pl.from_dict(name_dict)
+    total_df = bc_agg_df.hstack(pc_agg_df)
+    total_df = total_df.hstack(ec_agg_df)
+    total_df = total_df.hstack(name_df)
 
-    print("body component", bc_df)
-    print("effort component", ec_df)
-    print("shape component", sc_df)
-    print("space component", pc_df)
-
-    laban_df = bc_df.join(ec_df, on="i_time", how="inner"
-        ).join(sc_df, on="i_time", how="inner"
-        ).join(pc_df, on="i_time", how="inner")
-
-    print(laban_df.columns)
-    print(laban_df)
-    # plot_polars_dataframe(bc_df)
-    # plot_polars_dataframe(ec_df)
-    # plot_polars_dataframe(sc_df)
-    # plot_polars_dataframe(pc_df)
-    # plot_polars_dataframe(laban_df)
-    bc_df = bc_df.drop(pl.col("i_time"))
-    ec_df = ec_df.drop(pl.col("i_time"))
-    sc_df = sc_df.drop(pl.col("i_time"))
-    pc_df = pc_df.drop(pl.col("i_time"))
-    laban_df = laban_df.drop(pl.col("i_time"))
-
-    # path
-    basename = os.path.basename(input_file)
-    basename = basename.split(".")[0]
-
-    # store dataframe
-    if not os.path.exists("./out") or not os.path.isdir("./out"):
-        os.makedirs("./out")
-    laban_df.write_parquet(f'./out/{basename}.parquet')
+    return total_df
     
-    # store output images
-    base_img_path = f'./img/{basename}'
-    if not os.path.exists(base_img_path) or not os.path.isdir(base_img_path):
-        os.makedirs(base_img_path)
-    plot_isomap(bc_df, f'{base_img_path}/body.png')
-    plot_isomap(ec_df, f'{base_img_path}/effort.png')
-    plot_isomap(sc_df, f'{base_img_path}/shape.png')
-    plot_isomap(pc_df, f'{base_img_path}/space.png')
-    plot_isomap(laban_df, f'{base_img_path}/all.png')
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

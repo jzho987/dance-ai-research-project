@@ -107,7 +107,8 @@ def generate(model, src_aud, src_aud_pos, src_pos, src_pos_pos):
     return out_seq
 
 def img_to_video_with_audio(input_dir, output_dir, music_path, name="untitled_video"):
-    assert os.path.exists(output_dir), f'output dir not exist. path: {output_dir}'
+    if not (os.path.exists(output_dir) and os.path.isdir(output_dir)):
+        os.makedirs(output_dir)
 
     # vars
     full_output_path_with_suffix_video = f'{output_dir}/{name}.mp4'
@@ -306,8 +307,9 @@ def process_generated(file, model_path):
 def process_pregen(file):
     with open(file) as f:
         json_obj = json.loads(f.read())
-        result = json_obj['result']
-        # result = json_obj
+        # result = json_obj['result']
+        result = json_obj
+        print(np.shape(result))
     np_dance = np.array(result)
     return np_dance
 
@@ -319,6 +321,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", default='results.json')
     parser.add_argument("--name", default='untitled_video.json')
     parser.add_argument("--music", default='music.wav')
+    parser.add_argument("--video_dir", default='./video')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--pre", action='store_true') # generate video with simple processed smpl data
     group.add_argument("--post", action='store_true') # generate video with generated data from the model
@@ -326,7 +329,6 @@ if __name__ == "__main__":
 
     # temp vars
     model_path = "./SMPL_MALE.pkl"
-    output_path = "./video"
     
     if args.pre:
         pregen = False
@@ -335,4 +337,4 @@ if __name__ == "__main__":
         pregen = True
         result = process_generated(args.file, model_path)
 
-    visualizeAndWrite(result, output_path, args.music, args.name)
+    visualizeAndWrite(result, args.video_dir, args.music, args.name)
