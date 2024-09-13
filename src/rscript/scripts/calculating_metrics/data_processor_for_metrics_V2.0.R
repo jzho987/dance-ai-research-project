@@ -23,3 +23,4 @@ process_multiple_metrics <- function(file_paths, output_name) {
 files <- list.files("data/processed", pattern = "\\.rds$", full.names = TRUE)
 
 process_multiple_metrics(files, "combined")
+

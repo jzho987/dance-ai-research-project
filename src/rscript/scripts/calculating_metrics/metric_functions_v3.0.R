@@ -15,6 +15,29 @@ calculate_average_height <- function(df) {
     )
 }
 
+# average distance --------------------------------------------------------
+calculate_average_distance <- function(df) {
+  df <- df %>%
+    group_by(Coord_Index) %>%
+    mutate(
+      dX = X - lag(X),
+      dY = Y - lag(Y),
+      dZ = Z - lag(Z),
+      distance = sqrt(dX^2 + dY^2 + dZ^2)
+    ) %>%
+    ungroup() %>%
+    filter(!is.na(distance))
+  
+  df %>%
+    group_by(Coord_Index) %>%
+    summarise(
+      avg_distance_moved = mean(distance, na.rm = TRUE),
+      sd_distance_moved = sd(distance, na.rm = TRUE),
+      min_distance_moved = min(distance, na.rm = TRUE),
+      max_distance_moved = max(distance, na.rm = TRUE)
+    )
+}
+
 # average velocity --------------------------------------------------------
 calculate_average_velocity <- function(df) {
   df <- df %>%
@@ -87,8 +110,10 @@ calculate_metrics <- function(df) {
   average_height <- calculate_average_height(df)
   average_velocity <- calculate_average_velocity(df)
   average_acceleration <- calculate_average_acceleration(df)
+  average_distance <- calculate_average_distance(df)
   
   final_metrics <- average_height %>%
+    left_join(average_distance, by = "Coord_Index") %>%
     left_join(average_velocity, by = "Coord_Index") %>%
     left_join(average_acceleration, by = "Coord_Index")
   
