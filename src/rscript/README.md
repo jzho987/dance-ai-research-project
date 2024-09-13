@@ -8,6 +8,7 @@ Analysis of .json files representing a dance
 data\ 
     raw\ # raw .json files
     processed\ # processed .rds files
+    metrics\ # all the drived metrics as .rds files
 output\ # exported media
 scripts\ # all rscripts
 ```
@@ -29,14 +30,19 @@ Data Dictionary for the processed `.rds` files:
 | `Y`| Y-Index of the joint (numeric) |
 |`Z` | Z-Index of the joint (numeric) |
 
+### # Derived all of the key metrics
 
-### # Experimented with visualizing the dataset
+Contains the functions used to calculate metrics:
 
-[visualization_experiments.R](https://github.com/jzho987/dance-ai-research-project/blob/feat/rscript/src/rscript/scripts/processing_the_data/visualization_experiments.R)
+[metric_functions_v3.0.R](https://github.com/jzho987/dance-ai-research-project/blob/feat/rscript/src/rscript/scripts/calculating_metrics/metric_functions_v3.0.R)
 
-### # Completed analysis of key metrics
+Derives metrics from the files in `data/processed` and outputs them to `data/metrics`:
 
-[deriving_metrics.R](https://github.com/jzho987/dance-ai-research-project/blob/feat/rscript/src/rscript/scripts/calculations/deriving_metrics.R)
+[data_processor_for_metrics_v2.0.R](https://github.com/jzho987/dance-ai-research-project/blob/feat/rscript/src/rscript/scripts/calculating_metrics/data_processor_for_metrics_V2.0R)
+
+### # Experimented with visualizing metrics
+
+[visualization_metrics](https://github.com/jzho987/dance-ai-research-project/blob/feat/rscript/src/rscript/scripts/visualizing_metrics)
 
 ### # Created an interactive Web UI to visualize dances from raw .json files
 
