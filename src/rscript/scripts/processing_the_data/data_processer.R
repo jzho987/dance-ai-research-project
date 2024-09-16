@@ -37,7 +37,7 @@ files <- list.files("data/raw")
 for (file in files){
   file_name <- sub("\\.[^.]*$", "", file) # removes extension
   file_path = file.path("data/raw", file)
-  
+
   data <- fromJSON(file_path)
   process_data(data, file_name)
 }
