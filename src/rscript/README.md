@@ -50,3 +50,9 @@ https://jxav258.shinyapps.io/visualization_tool/
 
 [visualization_tool.R](https://github.com/jzho987/dance-ai-research-project/blob/feat/rscript/src/rscript/scripts/visualization_tool/visualization_tool.R)
 
+## TODO
+
+- Streamline this whole project and separate the main files from the experiments/tests
+- Calculate facing angle
+- Analyse the difference between two different files
+
