@@ -41,8 +41,3 @@ for (file in files){
   data <- fromJSON(file_path)
   process_data(data, file_name)
 }
-
-# processes one hardcoded file
-# json_data <- fromJSON("data/raw/empty_generated_0_shift_28.json")
-# data <- json_data[["result"]]
-# process_data(data, "empty_generated_0_shift_28")
