@@ -8,13 +8,15 @@ library(tidyr)
 calculate_average_height <- function(df) {
   df %>%
     # Filter only the selected Coord_Index values
-    filter(Coord_Index %in% c(22, 21, 1, 10)) %>%
+    filter(Coord_Index %in% c(1, 8, 9, 10, 21, 22)) %>%
     # Replace Coord_Index with corresponding tags
     mutate(Coord_Index = case_when(
-      Coord_Index == 22 ~ "wrist_right",
-      Coord_Index == 21 ~ "wrist_left",
       Coord_Index == 1  ~ "pelvis",
-      Coord_Index == 10 ~ "solar_plexus"
+      Coord_Index == 8  ~ "ankle_right",
+      Coord_Index == 9 ~ "ankle_left",
+      Coord_Index == 10 ~ "solar_plexus",
+      Coord_Index == 21 ~ "wrist_right",
+      Coord_Index == 22 ~ "wrist_left"
     )) %>%
     group_by(Coord_Index) %>%
     summarise(
@@ -62,13 +64,15 @@ calculate_average_velocity <- function(df) {
   # Filter and calculate velocity
   df <- df %>%
     # Filter only the selected Coord_Index values
-    filter(Coord_Index %in% c(22, 21, 1, 10)) %>%
+    filter(Coord_Index %in% c(1, 8, 9, 10, 21, 22)) %>%
     # Replace Coord_Index with corresponding tags
     mutate(Coord_Index = case_when(
-      Coord_Index == 22 ~ "wrist_right",
-      Coord_Index == 21 ~ "wrist_left",
       Coord_Index == 1  ~ "pelvis",
-      Coord_Index == 10 ~ "solar_plexus"
+      Coord_Index == 8  ~ "ankle_right",
+      Coord_Index == 9 ~ "ankle_left",
+      Coord_Index == 10 ~ "solar_plexus",
+      Coord_Index == 21 ~ "wrist_right",
+      Coord_Index == 22 ~ "wrist_left"
     )) %>%
     group_by(Coord_Index) %>%
     mutate(
@@ -105,13 +109,15 @@ calculate_average_acceleration <- function(df) {
   # Filter and calculate velocity and acceleration
   df <- df %>%
     # Filter only the selected Coord_Index values
-    filter(Coord_Index %in% c(22, 21, 1, 10)) %>%
+    filter(Coord_Index %in% c(1, 8, 9, 10, 21, 22)) %>%
     # Replace Coord_Index with corresponding tags
     mutate(Coord_Index = case_when(
-      Coord_Index == 22 ~ "wrist_right",
-      Coord_Index == 21 ~ "wrist_left",
       Coord_Index == 1  ~ "pelvis",
-      Coord_Index == 10 ~ "solar_plexus"
+      Coord_Index == 8  ~ "ankle_right",
+      Coord_Index == 9 ~ "ankle_left",
+      Coord_Index == 10 ~ "solar_plexus",
+      Coord_Index == 21 ~ "wrist_right",
+      Coord_Index == 22 ~ "wrist_left"
     )) %>%
     group_by(Coord_Index) %>%
     # Calculate velocity
