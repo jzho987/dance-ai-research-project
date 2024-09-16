@@ -1,7 +1,21 @@
 # Contains all the functions used to derive metrics
 # Updated to calculate min and max values
 
+# Note coordinates here are 1-based indexed
+# Wrist R: 22
+# Wrist L: 21
+# Ankle R: 9
+# Ankle L: 8
+# Pelvis: 1
+# Solar plexus: 10
+
 library(dplyr)
+
+filter_coordinates <- function(df) {
+  interested_coordinates <- c(22, 21, 9, 8, 1, 10)
+  df %>%
+    filter(Coord_Index %in% interested_coordinates)
+}
 
 # average height ----------------------------------------------------------
 calculate_average_height <- function(df) {
@@ -107,10 +121,12 @@ calculate_average_acceleration <- function(df) {
 
 # combining everything ------------------------------------------------------
 calculate_metrics <- function(df) {
-  average_height <- calculate_average_height(df)
-  average_velocity <- calculate_average_velocity(df)
-  average_acceleration <- calculate_average_acceleration(df)
-  average_distance <- calculate_average_distance(df)
+  filtered_df <- filter_coordinates(df)
+  
+  average_height <- calculate_average_height(filtered_df)
+  average_velocity <- calculate_average_velocity(filtered_df)
+  average_acceleration <- calculate_average_acceleration(filtered_df)
+  average_distance <- calculate_average_distance(filtered_df)
   
   final_metrics <- average_height %>%
     left_join(average_distance, by = "Coord_Index") %>%
