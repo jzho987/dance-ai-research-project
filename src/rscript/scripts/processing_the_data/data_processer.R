@@ -39,8 +39,8 @@ for (file in files){
   file_path = file.path("data/raw", file)
   
   json_data <- fromJSON(file_path)
-  data <- json_data[["result"]]
-  process_data(data, file_name)
+  # data <- json_data[["result"]]
+  process_data(json_data, file_name)
 }
 
 # processes one hardcoded file
