@@ -178,3 +178,5 @@ cython_debug/
 *.npz
 *.ckpt
 *.csv
+*.png
+data/
