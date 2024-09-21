@@ -4,28 +4,46 @@ library(dplyr)
 
 df <- readRDS("data/metrics/combined_metrics.rds")
 
-# Extract desired data
-extracted_data <- df %>%
-  select(matches("ankle_left.*height"))
+generate_boxplot <- function(body_part, metric) {
+  # Create pattern to match desired data
+  pattern <- paste0(body_part, ".*", metric)
+  
+  # Extract desired data
+  extracted_data <- df %>%
+    select(matches(pattern))
+  
+  # Check if any data was found
+  if (ncol(extracted_data) == 0) {
+    message(paste("No data found for the combination:", body_part, metric))
+    return(NULL)  # Skip this combination
+  }
+  
+  # Convert data to long format
+  long_data <- extracted_data %>%
+    pivot_longer(cols = everything(), 
+                 names_to = "metric", 
+                 values_to = "value")
+  
+  # Plot data as box plot
+  plot <- ggplot(long_data, aes(x = metric, y = value)) +
+    geom_boxplot() +
+    labs(title = paste("Box Plot of", body_part, metric),
+         x = "Metrics",
+         y = "Values") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  return(plot)
+}
 
-print("extracted_data")
-print(extracted_data)
+body_parts <- c("ankle_left", "ankle_right", "pelvis", "solar_plexus", "wrist_left", "wrist_right")
+metrics <- c("height", "distance_moved", "acceleration_magnitude", "velocity_magnitude")
 
-# Convert data to long format
-long_data <- extracted_data %>%
-  pivot_longer(cols = everything(), 
-               names_to = "metric", 
-               values_to = "value")
-
-print("long_data")
-print(long_data)
-
-# Plot data as box plot
-ggplot(long_data, aes(x = metric, y = value)) +
-  geom_boxplot() +
-  labs(title = "Box Plot of Ankle Left Height",
-       x = "Metrics",
-       y = "Values") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
+# Generate and display plots for each combination
+for (body_part in body_parts) {
+  for (metric in metrics) {
+    plot <- generate_boxplot(body_part, metric)
+    if (!is.null(plot)) {
+      print(plot)
+    }
+  }
+}
