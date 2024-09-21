@@ -20,14 +20,14 @@ calculate_average_height <- function(df) {
     )) %>%
     group_by(Coord_Index) %>%
     summarise(
-      average_height = mean(Y, na.rm = TRUE),
+      avg_height = mean(Y, na.rm = TRUE),
       sd_height = sd(Y, na.rm = TRUE),
       min_height = min(Y, na.rm = TRUE),
       max_height = max(Y, na.rm = TRUE)
     ) %>%
     pivot_wider(
       names_from = Coord_Index,
-      values_from = c(average_height, sd_height, min_height, max_height),
+      values_from = c(avg_height, sd_height, min_height, max_height),
       names_glue = "{Coord_Index}_{.value}"
     )
 }
