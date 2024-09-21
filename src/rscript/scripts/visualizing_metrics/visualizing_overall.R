@@ -1,6 +1,7 @@
 library(ggplot2)
 library(tidyr)
 library(dplyr)
+library(stringr)
 
 df <- readRDS("data/metrics/combined_metrics.rds")
 
@@ -22,13 +23,16 @@ generate_boxplot <- function(body_part, metric) {
   long_data <- extracted_data %>%
     pivot_longer(cols = everything(), 
                  names_to = "metric", 
-                 values_to = "value")
-  
+                 values_to = "value") %>%
+    mutate(
+      metric_clean = str_extract(metric, "avg|sd|min|max")
+    )
+ 
   # Plot data as box plot
-  plot <- ggplot(long_data, aes(x = metric, y = value)) +
+  plot <- ggplot(long_data, aes(x = metric_clean, y = value)) +
     geom_boxplot() +
-    labs(title = paste("Box Plot of", body_part, metric),
-         x = "Metrics",
+    labs(title = paste("Box plot of", body_part, "-", metric),
+         x = "Statistical Measure",
          y = "Values") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
