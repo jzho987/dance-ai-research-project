@@ -8,7 +8,7 @@ library(plotly)
 
 df <- readRDS("data/metrics/combined_metrics.rds")
 
-generate_boxplot <- function(body_part, metric, plot_type="boxplot") {
+generate_plot <- function(body_part, metric, plot_type="boxplot", skip_filenames = NULL) {
   # Create pattern to match desired data
   pattern <- paste0(body_part, ".*", metric)
   
@@ -20,6 +20,12 @@ generate_boxplot <- function(body_part, metric, plot_type="boxplot") {
   if (ncol(extracted_data) == 1) {  # Only file_name column
     message(paste("No data found for the combination:", body_part, metric))
     return(NULL)  # Skip this combination
+  }
+  
+  # Filter out specified filenames if skip_filenames is provided
+  if (!is.null(skip_filenames)) {
+    extracted_data <- extracted_data %>%
+      filter(!file_name %in% skip_filenames)
   }
   
   # Convert data to long format
@@ -57,6 +63,9 @@ generate_boxplot <- function(body_part, metric, plot_type="boxplot") {
   return(interactive_plot)
 }
 
+# List of filenames to skip
+skip_filenames <- c("dance_data_35_corrected", "dance_data_32_corrected", "dance_data_0_corrected")
+
 body_parts <- c("ankle_left", "ankle_right", "pelvis", "solar_plexus", "wrist_left", "wrist_right")
 metrics <- c("height", "distance_moved", "acceleration_magnitude", "velocity_magnitude")
 
@@ -65,7 +74,7 @@ plot_list <- list()
 # Generate and display plots for each combination
 for (body_part in body_parts) {
   for (metric in metrics) {
-    plot <- generate_boxplot(body_part, metric, "scatterplot")
+    plot <- generate_plot(body_part, metric, "scatterplot", skip_filenames)
     if (!is.null(plot)) {
       # print(plot)
       
@@ -78,7 +87,7 @@ for (body_part in body_parts) {
 }
 
 # Display a single plot
-print(plot_list[["ankle_left_height"]])
+print(plot_list[["ankle_left_acceleration_magnitude"]])
 
 # # To save all plots as interactive HTML files:
 # for (plot_name in names(plot_list)) {
