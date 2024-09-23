@@ -8,7 +8,7 @@ library(plotly)
 
 df <- readRDS("data/metrics/combined_metrics.rds")
 
-generate_boxplot <- function(body_part, metric) {
+generate_boxplot <- function(body_part, metric, plot_type="boxplot") {
   # Create pattern to match desired data
   pattern <- paste0(body_part, ".*", metric)
   
@@ -32,13 +32,25 @@ generate_boxplot <- function(body_part, metric) {
       hover_text = paste("File:", file_name, "<br>Value:", round(value, 4))
     )
  
-  # Plot data as box plot
-  plot <- ggplot(long_data, aes(x = metric_clean, y = value)) +
-    geom_boxplot() + 
-    labs(title = paste("Box plot of", body_part, "-", metric),
-         x = "Statistical Measure",
-         y = "Values") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  if (plot_type == "boxplot") {
+    # Plot data as box plot
+    plot <- ggplot(long_data, aes(x = metric_clean, y = value)) +
+      geom_boxplot() + 
+      labs(title = paste("Box plot of", body_part, "-", metric),
+           x = "Statistical Measure",
+           y = "Values") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  } else if (plot_type == "scatterplot") {
+    # Plot data as scatter plot
+    plot <- ggplot(long_data, aes(x = metric_clean, y = value, text = hover_text)) +
+      geom_jitter(width = 0.2, alpha = 0.5) +  # Add jittered points
+      labs(title = paste("Scatter plot of", body_part, "-", metric),
+           x = "Statistical Measure",
+           y = "Values") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  } else {
+    stop("Invalid plot_type. Choose either 'boxplot' or 'scatterplot'.")
+  }
   
   interactive_plot <- ggplotly(plot, tooltip = "text")
   
@@ -53,7 +65,7 @@ plot_list <- list()
 # Generate and display plots for each combination
 for (body_part in body_parts) {
   for (metric in metrics) {
-    plot <- generate_boxplot(body_part, metric)
+    plot <- generate_boxplot(body_part, metric, "scatterplot")
     if (!is.null(plot)) {
       # print(plot)
       
