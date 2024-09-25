@@ -13,8 +13,8 @@ def main(input_dir: str):
         df = df.vstack(feat_df)
     
     print(df)
-    df.write_csv("./features_cleaned.csv")
+    df.write_csv("./features_complete.csv")
     
 
 if __name__ == "__main__":
-    main("./data/clips")
+    main("./data/raw/complete")
