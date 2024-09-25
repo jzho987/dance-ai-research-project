@@ -1,8 +1,6 @@
 import torch
 import numpy as np
 import json
-from tqdm import tqdm
-import cv2
 from smplx import SMPL
 from PIL import Image
 from multiprocessing import Pool
