@@ -29,14 +29,14 @@ process_data <- function(data, name){
   
   # Print the data frame
   print(df)
-  saveRDS(df, file = paste("data/processed/", name, ".rds", sep=""))
+  saveRDS(df, file = paste("data/processed/output/", name, ".rds", sep=""))
 }
 
 # process everything in the 'data/raw' directory
-files <- list.files("data/raw")
+files <- list.files("data/raw/output")
 for (file in files){
   file_name <- sub("\\.[^.]*$", "", file) # removes extension
-  file_path = file.path("data/raw", file)
+  file_path = file.path("data/raw/output", file)
 
   data <- fromJSON(file_path)
   process_data(data, file_name)
