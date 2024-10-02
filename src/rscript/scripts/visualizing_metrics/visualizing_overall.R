@@ -4,6 +4,7 @@ library(ggplot2)
 library(tidyr)
 library(dplyr)
 library(stringr)
+library(patchwork)
 
 df <- readRDS("data/metrics/combined_metrics.rds")
 
