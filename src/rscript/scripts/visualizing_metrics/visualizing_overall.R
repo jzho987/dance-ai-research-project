@@ -6,7 +6,7 @@ library(dplyr)
 library(stringr)
 library(patchwork)
 
-df <- readRDS("data/metrics/combined_metrics.rds")
+df <- readRDS("data/metrics/output/combined_metrics.rds")
 
 generate_plot <- function(body_part, metric, plot_type, skip_filenames = NULL) {
   # Create pattern to match desired data
@@ -94,4 +94,4 @@ print(plot_list[["ankle_left_acceleration_magnitude"]])
 # Combine all plots into a single image
 combined_plot <- wrap_plots(plotlist = plot_list, ncol = 5)  # Adjust ncol for layout
 # print(combined_plot)
-ggsave(paste0("output/overall/combined_", plot_type,".png"), plot = combined_plot, width = 25, height = 20, dpi = 300) # Adjust width and height
+ggsave(paste0("output/overall/output/combined_", plot_type,".png"), plot = combined_plot, width = 25, height = 20, dpi = 300) # Adjust width and height
