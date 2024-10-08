@@ -27,6 +27,10 @@ process_data <- function(data, name){
   # Combine into a data frame
   df <- data.frame(Iteration = iteration, Coord_Index = coord_index, X = x, Y = y, Z = z)
   
+  # Add new columns for original dance and music
+  df$original_dance <- sub("\\..*", "", name)
+  df$music <- sub(".*-(m[A-Z]{2}[0-9]).*", "\\1", name)
+  
   # Print the data frame
   print(df)
   saveRDS(df, file = paste("data/processed/", name, ".rds", sep=""))
