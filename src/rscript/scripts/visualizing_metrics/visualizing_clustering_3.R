@@ -12,21 +12,35 @@ k_means_data <- read.csv("data/k-means-8n.csv")
 # Load the RDS (combined metrics) file
 combined_metrics <- readRDS("data/metrics/combined_metrics.rds")
 
+# Load the input combined metrics file
+input_metrics <- readRDS("data/metrics/archive/input/combined_metrics.rds")
+
 # Merge the datasets
 merged_data <- merge(k_means_data, combined_metrics, by.x = "name", by.y = "file_name")
 
-# Define music codes
+# Add a 'music' column to input_metrics with value 'input'
+input_metrics$music <- "input"
+
+# Add a 'cluster' column to input_metrics (you can set it to NA or a specific value)
+input_metrics$cluster <- NA
+
+input_metrics <- input_metrics %>% rename(name = file_name)
+
+# Combine merged_data and input_metrics
+all_data <- rbind(merged_data, input_metrics)
+
+# Define music codes (now including 'input')
 music <- c(
-  "mBR0", "mHO0", "mJB0", "mJS0", "mKR0", "mLH0", "mLO0", "mMH0", "mPO0", "mWA0"
+  "mBR0", "mHO0", "mJB0", "mJS0", "mKR0", "mLH0", "mLO0", "mMH0", "mPO0", "mWA0", "input"
 )
 
-# Define a color palette for clusters
-cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "brown", "purple", "pink")
+# Define a color palette for clusters and input
+cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "brown", "purple", "pink", "gray")
 
 # ---- Section 2: Function to create boxplots for a specific cluster ----
 create_cluster_boxplots <- function(data, cluster_number) {
-  # Filter data for the specific cluster
-  cluster_data <- data %>% filter(cluster == cluster_number)
+  # Filter data for the specific cluster and input data
+  cluster_data <- data %>% filter(cluster == cluster_number | music == "input")
   
   # Define the specific variables to plot
   vars_to_plot <- c(
@@ -50,8 +64,9 @@ create_cluster_boxplots <- function(data, cluster_number) {
     if (var %in% colnames(cluster_data)) {
       # Check if there are non-NA values in the variable
       if (sum(!is.na(cluster_data[[var]])) > 0) {
-        p <- ggplot(cluster_data, aes(x = music, y = .data[[var]])) +
-          geom_boxplot(fill = cluster_color) +  # Use the cluster color here
+        p <- ggplot(cluster_data, aes(x = music, y = .data[[var]], fill = music)) +
+          geom_boxplot() +
+          scale_fill_manual(values = c(setNames(rep(cluster_color, length(music) - 1), music[-length(music)]), input = "gray")) +
           labs(title = paste(var), x = "", y = "") +
           theme_minimal() +
           theme(
@@ -70,7 +85,7 @@ create_cluster_boxplots <- function(data, cluster_number) {
   
   # Use wrap_plots from patchwork to arrange plots in a grid
   combined_plot <- wrap_plots(box_plots, ncol = 3) + 
-    plot_annotation(title = paste("Box Plots of Selected Metrics for Cluster", cluster_number))
+    plot_annotation(title = paste("Box Plots of Selected Metrics for Cluster", cluster_number, "and Input Data"))
   
   return(combined_plot)
 }
@@ -81,11 +96,11 @@ clusters <- unique(merged_data$cluster)
 
 # Loop through each cluster and create a plot
 for (cluster_num in clusters) {
-  cluster_plot <- create_cluster_boxplots(merged_data, cluster_num)
-  ggsave(paste0("output/clustered/combined_clustered_boxplot_cluster_", cluster_num, ".png"), 
+  cluster_plot <- create_cluster_boxplots(all_data, cluster_num)
+  ggsave(paste0("output/clustered/combined_clustered_boxplot_cluster_", cluster_num, "_with_input.png"), 
          plot = cluster_plot, width = 8, height = 16, dpi = 600)  # Increased width and height for better readability
-  print(paste("Created plot for Cluster", cluster_num))
+  print(paste("Created plot for Cluster", cluster_num, "with input data"))
 }
 
 # ---- Section 4: Print a sample plot (optional) ----
-print(create_cluster_boxplots(merged_data, clusters[1]))
+print(create_cluster_boxplots(all_data, clusters[1]))
