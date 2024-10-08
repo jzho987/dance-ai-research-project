@@ -18,16 +18,14 @@ input_metrics <- readRDS("data/metrics/archive/input/combined_metrics.rds")
 # Merge the datasets
 merged_data <- merge(k_means_data, combined_metrics, by.x = "name", by.y = "file_name")
 
+# Merge input data with k-means clustering results
+merged_input <- merge(k_means_data, input_metrics, by.x = "name", by.y = "file_name")
+
 # Add a 'music' column to input_metrics with value 'input'
-input_metrics$music <- "input"
-
-# Add a 'cluster' column to input_metrics (you can set it to NA or a specific value)
-input_metrics$cluster <- NA
-
-input_metrics <- input_metrics %>% rename(name = file_name)
+merged_input$music <- "input"
 
 # Combine merged_data and input_metrics
-all_data <- rbind(merged_data, input_metrics)
+all_data <- rbind(merged_data, merged_input)
 
 # Define music codes (now including 'input')
 music <- c(
@@ -39,8 +37,15 @@ cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "brown", "purple
 
 # ---- Section 2: Function to create boxplots for a specific cluster ----
 create_cluster_boxplots <- function(data, cluster_number) {
-  # Filter data for the specific cluster and input data
-  cluster_data <- data %>% filter(cluster == cluster_number | music == "input")
+  # Filter data for the specific cluster
+  cluster_data <- data %>% filter(cluster == cluster_number)
+  
+  # Separate the cluster data and input data
+  cluster_only_data <- cluster_data %>% filter(music != "input")
+  input_data <- cluster_data %>% filter(music == "input")
+  
+  # Combine the filtered data
+  plot_data <- rbind(cluster_only_data, input_data)
   
   # Define the specific variables to plot
   vars_to_plot <- c(
@@ -61,12 +66,12 @@ create_cluster_boxplots <- function(data, cluster_number) {
   
   # Loop through each variable and create a box plot
   for (var in vars_to_plot) {
-    if (var %in% colnames(cluster_data)) {
+    if (var %in% colnames(plot_data)) {
       # Check if there are non-NA values in the variable
-      if (sum(!is.na(cluster_data[[var]])) > 0) {
-        p <- ggplot(cluster_data, aes(x = music, y = .data[[var]], fill = music)) +
+      if (sum(!is.na(plot_data[[var]])) > 0) {
+        p <- ggplot(plot_data, aes(x = music, y = .data[[var]], fill = music)) +
           geom_boxplot() +
-          scale_fill_manual(values = c(setNames(rep(cluster_color, length(music) - 1), music[-length(music)]), input = "gray")) +
+          scale_fill_manual(values = c(setNames(rep(cluster_color, length(unique(cluster_only_data$music))), unique(cluster_only_data$music)), input = "gray")) +
           labs(title = paste(var), x = "", y = "") +
           theme_minimal() +
           theme(
