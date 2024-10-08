@@ -1,3 +1,4 @@
+# Generates file per music
 # Load required libraries
 library(ggplot2)
 library(Rtsne)
@@ -18,6 +19,9 @@ merged_data <- merge(k_means_data, combined_metrics, by.x = "name", by.y = "file
 music_all <- c(
   "mBR0", "mHO0", "mJB0", "mJS0", "mKR0", "mLH0", "mLO0", "mMH0", "mPO0", "mWA0"
 )
+
+# Define a color palette for clusters
+cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "brown", "purple", "pink")
 
 # ---- Section 2: Function to create filtered boxplots ----
 create_filtered_boxplots <- function(data, music_filter = NULL) {
@@ -47,6 +51,7 @@ create_filtered_boxplots <- function(data, music_filter = NULL) {
       if (sum(!is.na(data[[var]])) > 0) {
         p <- ggplot(data, aes(x = as.factor(cluster), y = .data[[var]], fill = as.factor(cluster))) +
           geom_boxplot() +
+          scale_fill_manual(values = cluster_colors) +  # Use the defined color palette
           labs(title = paste(var), x = "", y = "") +
           theme_minimal() +
           theme(
