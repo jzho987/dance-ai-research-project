@@ -7,7 +7,7 @@ library(dplyr)
 
 # ---- Section 1: Load Data ----
 # Load the CSV (k-means) file into a data frame
-k_means_data <- read.csv("data/k-means-8n.csv")
+k_means_data <- read.csv("data/k-means-8n-final.csv")
 
 # Load the RDS (combined metrics) file
 combined_metrics <- readRDS("data/metrics/combined_metrics.rds")
