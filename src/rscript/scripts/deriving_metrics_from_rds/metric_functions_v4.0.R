@@ -185,8 +185,17 @@ calculate_metrics_multiple <- function(dataframes, file_names) {
   metrics_list <- lapply(seq_along(dataframes), function(i) {
     df <- dataframes[[i]]
     metrics <- calculate_metrics(df)
+    
+    # Extract original_dance and music from the dataframe
+    # Assuming these columns exist in the first row of each dataframe
+    original_dance <- df$original_dance[1]
+    music <- df$music[1]
+    
     metrics <- metrics %>%
-      mutate(file_name = file_names[i])  # Add corresponding file name
+      mutate(
+        file_name = original_dance,
+        music = music
+      )
     return(metrics)
   })
   
@@ -195,7 +204,7 @@ calculate_metrics_multiple <- function(dataframes, file_names) {
   
   # Move file_name to be the first column
   final_metrics <- final_metrics %>%
-    select(file_name, everything())
+    select(file_name, music, everything())
   
   return(final_metrics)
 }

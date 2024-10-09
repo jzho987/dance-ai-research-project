@@ -4,7 +4,7 @@
 library(writexl)
 library(tools)
 
-source("scripts/calculating_metrics/metric_functions_v4.0.R")
+source("scripts/deriving_metrics_from_rds/metric_functions_v4.0.R")
 
 # Dynamically get all .rds files from the "data/processed" folder
 rds_files <- list.files(path = "data/processed", pattern = "*.rds", full.names = TRUE)
