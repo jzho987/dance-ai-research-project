@@ -33,7 +33,7 @@ music <- c(
 )
 
 # Define a color palette for clusters and input
-cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "brown", "purple", "pink", "gray")
+cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "cornflowerblue", "purple", "pink", "gray")
 
 # ---- Section 2: Function to create boxplots for a specific cluster ----
 create_cluster_boxplots <- function(data, cluster_number) {
