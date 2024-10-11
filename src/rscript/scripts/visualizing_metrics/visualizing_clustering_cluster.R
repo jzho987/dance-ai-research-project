@@ -35,7 +35,18 @@ music <- c(
 # Define a color palette for clusters and input
 cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "cornflowerblue", "purple", "pink", "gray")
 
-# ---- Section 2: Function to create boxplots for a specific cluster ----
+# ---- Section 2: Combine Paired Metrics ----
+all_data <- all_data %>%
+  mutate(
+    ankles_avg_height = (ankle_left_avg_height + ankle_right_avg_height) / 2,
+    ankles_avg_velocity_magnitude = (ankle_left_avg_velocity_magnitude + ankle_right_avg_velocity_magnitude) / 2,
+    torso_avg_height = (pelvis_avg_height + solar_plexus_avg_height) / 2,
+    torso_avg_velocity_magnitude = (pelvis_avg_velocity_magnitude + solar_plexus_avg_velocity_magnitude) / 2,
+    wrists_avg_height = (wrist_left_avg_height + wrist_right_avg_height) / 2,
+    wrists_avg_velocity_magnitude = (wrist_left_avg_velocity_magnitude + wrist_right_avg_velocity_magnitude) / 2
+  )
+
+# ---- Section 3: Function to create boxplots for a specific cluster ----
 create_cluster_boxplots <- function(data, cluster_number) {
   # Filter data for the specific cluster
   cluster_data <- data %>% filter(cluster == cluster_number)
@@ -47,14 +58,11 @@ create_cluster_boxplots <- function(data, cluster_number) {
   # Combine the filtered data
   plot_data <- rbind(cluster_only_data, input_data)
   
-  # Define the specific variables to plot
+  # Define the new combined variables to plot
   vars_to_plot <- c(
-    "ankle_left_avg_height", "ankle_left_avg_velocity_magnitude",
-    "ankle_right_avg_height", "ankle_right_avg_velocity_magnitude",
-    "pelvis_avg_height", "pelvis_avg_velocity_magnitude",
-    "solar_plexus_avg_height", "solar_plexus_avg_velocity_magnitude",
-    "wrist_left_avg_height", "wrist_left_avg_velocity_magnitude",
-    "wrist_right_avg_height", "wrist_right_avg_velocity_magnitude", 
+    "ankles_avg_height", "ankles_avg_velocity_magnitude",
+    "torso_avg_height", "torso_avg_velocity_magnitude",
+    "wrists_avg_height", "wrists_avg_velocity_magnitude",
     "pelvis_avg_distance_moved"
   )
   
@@ -89,23 +97,23 @@ create_cluster_boxplots <- function(data, cluster_number) {
   }
   
   # Use wrap_plots from patchwork to arrange plots in a grid
-  combined_plot <- wrap_plots(box_plots, ncol = 3) + 
-    plot_annotation(title = paste("Box Plots of Selected Metrics for Cluster", cluster_number, "and Input Data"))
+  combined_plot <- wrap_plots(box_plots, ncol = 4) + 
+    plot_annotation(title = paste("Box Plots of Combined Metrics for Cluster", cluster_number, "and Input Data"))
   
   return(combined_plot)
 }
 
-# ---- Section 3: Create and save plots for each cluster ----
+# ---- Section 4: Create and save plots for each cluster ----
 # Get unique cluster numbers
 clusters <- unique(merged_data$cluster)
 
 # Loop through each cluster and create a plot
 for (cluster_num in clusters) {
   cluster_plot <- create_cluster_boxplots(all_data, cluster_num)
-  ggsave(paste0("output/clustered/combined_clustered_boxplot_cluster_", cluster_num, "_with_input.png"), 
-         plot = cluster_plot, width = 8, height = 16, dpi = 600)  # Increased width and height for better readability
+  ggsave(paste0("output/clustered/cluster_with_input/combined_clustered_boxplot_cluster_", cluster_num, "_with_input.png"), 
+         plot = cluster_plot, width = 8, height = 4, dpi = 600)  # Adjusted height for fewer plots
   print(paste("Created plot for Cluster", cluster_num, "with input data"))
 }
 
-# ---- Section 4: Print a sample plot (optional) ----
+# ---- Section 5: Print a sample plot (optional) ----
 print(create_cluster_boxplots(all_data, clusters[1]))

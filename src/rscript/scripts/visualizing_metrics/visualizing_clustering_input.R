@@ -3,6 +3,7 @@
 library(ggplot2)
 library(Rtsne)
 library(patchwork)
+library(dplyr)
 
 # ---- Section 1: Load Data ----
 # Load the CSV (k-means) file into a data frame
@@ -17,15 +18,23 @@ merged_data <- merge(k_means_data, combined_metrics, by.x = "name", by.y = "file
 # Define a color palette for clusters and input
 cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "cornflowerblue", "purple", "pink", "gray")
 
-# ---- Section 2: Visualise Cluster Boxplots ----
-# Define the specific variables to plot
+# ---- Section 2: Combine Paired Metrics ----
+merged_data <- merged_data %>%
+  mutate(
+    ankles_avg_height = (ankle_left_avg_height + ankle_right_avg_height) / 2,
+    ankles_avg_velocity_magnitude = (ankle_left_avg_velocity_magnitude + ankle_right_avg_velocity_magnitude) / 2,
+    torso_avg_height = (pelvis_avg_height + solar_plexus_avg_height) / 2,
+    torso_avg_velocity_magnitude = (pelvis_avg_velocity_magnitude + solar_plexus_avg_velocity_magnitude) / 2,
+    wrists_avg_height = (wrist_left_avg_height + wrist_right_avg_height) / 2,
+    wrists_avg_velocity_magnitude = (wrist_left_avg_velocity_magnitude + wrist_right_avg_velocity_magnitude) / 2
+  )
+
+# ---- Section 3: Visualise Cluster Boxplots ----
+# Define the new combined variables to plot
 vars_to_plot <- c(
-  "ankle_left_avg_height", "ankle_left_avg_velocity_magnitude",
-  "ankle_right_avg_height", "ankle_right_avg_velocity_magnitude",
-  "pelvis_avg_height", "pelvis_avg_velocity_magnitude",
-  "solar_plexus_avg_height", "solar_plexus_avg_velocity_magnitude",
-  "wrist_left_avg_height", "wrist_left_avg_velocity_magnitude",
-  "wrist_right_avg_height", "wrist_right_avg_velocity_magnitude", 
+  "ankles_avg_height", "ankles_avg_velocity_magnitude",
+  "torso_avg_height", "torso_avg_velocity_magnitude",
+  "wrists_avg_height", "wrists_avg_velocity_magnitude",
   "pelvis_avg_distance_moved"
 )
 
@@ -57,10 +66,9 @@ for (var in vars_to_plot) {
 }
 
 # Use wrap_plots from patchwork to arrange plots in a grid
-combined_plot <- wrap_plots(box_plots, ncol = 4) + plot_annotation(title = "Box Plots of Selected Metrics by Cluster (Input)")
+combined_plot <- wrap_plots(box_plots, ncol = 4) + plot_annotation(title = "Box Plots of Combined Metrics by Cluster (Input)")
 
 # Print the combined plot
 print(combined_plot)
 
-ggsave(paste0("output/clustered/combined_clustered_boxplot.png"), plot = combined_plot, width = 8, height = 8, dpi = 600) # Adjust width and height
-
+ggsave(paste0("output/clustered/combined_clustered_boxplot.png"), plot = combined_plot, width = 8, height = 4, dpi = 600) # Adjust width and height as needed

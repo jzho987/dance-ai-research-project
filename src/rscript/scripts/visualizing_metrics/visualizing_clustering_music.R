@@ -23,21 +23,29 @@ music_all <- c(
 # Define a color palette for clusters
 cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "cornflowerblue", "purple", "pink")
 
-# ---- Section 2: Function to create filtered boxplots ----
+# ---- Section 2: Combine Paired Metrics ----
+merged_data <- merged_data %>%
+  mutate(
+    ankles_avg_height = (ankle_left_avg_height + ankle_right_avg_height) / 2,
+    ankles_avg_velocity_magnitude = (ankle_left_avg_velocity_magnitude + ankle_right_avg_velocity_magnitude) / 2,
+    torso_avg_height = (pelvis_avg_height + solar_plexus_avg_height) / 2,
+    torso_avg_velocity_magnitude = (pelvis_avg_velocity_magnitude + solar_plexus_avg_velocity_magnitude) / 2,
+    wrists_avg_height = (wrist_left_avg_height + wrist_right_avg_height) / 2,
+    wrists_avg_velocity_magnitude = (wrist_left_avg_velocity_magnitude + wrist_right_avg_velocity_magnitude) / 2
+  )
+
+# ---- Section 3: Function to create filtered boxplots ----
 create_filtered_boxplots <- function(data, music_filter = NULL) {
   # Apply music filter if specified
   if (!is.null(music_filter)) {
     data <- data %>% filter(music == music_filter)
   }
   
-  # Define the specific variables to plot
+  # Define the new combined variables to plot
   vars_to_plot <- c(
-    "ankle_left_avg_height", "ankle_left_avg_velocity_magnitude",
-    "ankle_right_avg_height", "ankle_right_avg_velocity_magnitude",
-    "pelvis_avg_height", "pelvis_avg_velocity_magnitude",
-    "solar_plexus_avg_height", "solar_plexus_avg_velocity_magnitude",
-    "wrist_left_avg_height", "wrist_left_avg_velocity_magnitude",
-    "wrist_right_avg_height", "wrist_right_avg_velocity_magnitude", 
+    "ankles_avg_height", "ankles_avg_velocity_magnitude",
+    "torso_avg_height", "torso_avg_velocity_magnitude",
+    "wrists_avg_height", "wrists_avg_velocity_magnitude",
     "pelvis_avg_distance_moved"
   )
   
@@ -69,23 +77,23 @@ create_filtered_boxplots <- function(data, music_filter = NULL) {
   }
   
   # Use wrap_plots from patchwork to arrange plots in a grid
-  combined_plot <- wrap_plots(box_plots, ncol = 3) + 
-    plot_annotation(title = paste("Box Plots of Selected Metrics by Cluster", 
+  combined_plot <- wrap_plots(box_plots, ncol = 4) + 
+    plot_annotation(title = paste("Box Plots of Combined Metrics by Cluster", 
                                   ifelse(is.null(music_filter), "", paste0("(Music:", music_filter, ")"))))
   
   return(combined_plot)
 }
 
-# ---- Section 3: Create and save plots ----
+# ---- Section 4: Create and save plots ----
 # Create and save the overall plot (no filter)
 overall_plot <- create_filtered_boxplots(merged_data)
-ggsave("output/clustered/combined_clustered_boxplot_all.png", plot = overall_plot, width = 6, height = 12, dpi = 600)
+ggsave("output/clustered/combined_clustered_boxplot_all.png", plot = overall_plot, width = 8, height = 4, dpi = 600)
 
 # Loop through each music code and create a filtered plot
 for (music_code in music_all) {
   filtered_plot <- create_filtered_boxplots(merged_data, music_code)
-  ggsave(paste0("output/clustered/combined_clustered_boxplot_", music_code, ".png"), 
-         plot = filtered_plot, width = 6, height = 12, dpi = 600)
+  ggsave(paste0("output/clustered/music/combined_clustered_boxplot_", music_code, ".png"), 
+         plot = filtered_plot, width = 8, height = 4, dpi = 600)
 }
 
 print(overall_plot)
