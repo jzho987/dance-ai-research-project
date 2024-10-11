@@ -20,12 +20,13 @@ cluster_colors <- c("red", "orange", "yellow", "green", "cyan", "cornflowerblue"
 # ---- Section 2: Visualise Cluster Boxplots ----
 # Define the specific variables to plot
 vars_to_plot <- c(
-  "ankle_left_avg_height", "ankle_left_avg_acceleration_magnitude", "ankle_left_avg_velocity_magnitude",
-  "ankle_right_avg_height", "ankle_right_avg_acceleration_magnitude", "ankle_right_avg_velocity_magnitude",
-  "pelvis_avg_height", "pelvis_avg_acceleration_magnitude", "pelvis_avg_velocity_magnitude",
-  "solar_plexus_avg_height", "solar_plexus_avg_acceleration_magnitude", "solar_plexus_avg_velocity_magnitude",
-  "wrist_left_avg_height", "wrist_left_avg_acceleration_magnitude", "wrist_left_avg_velocity_magnitude",
-  "wrist_right_avg_height", "wrist_right_avg_acceleration_magnitude", "wrist_right_avg_velocity_magnitude", "pelvis_avg_distance_moved"
+  "ankle_left_avg_height", "ankle_left_avg_velocity_magnitude",
+  "ankle_right_avg_height", "ankle_right_avg_velocity_magnitude",
+  "pelvis_avg_height", "pelvis_avg_velocity_magnitude",
+  "solar_plexus_avg_height", "solar_plexus_avg_velocity_magnitude",
+  "wrist_left_avg_height", "wrist_left_avg_velocity_magnitude",
+  "wrist_right_avg_height", "wrist_right_avg_velocity_magnitude", 
+  "pelvis_avg_distance_moved"
 )
 
 # Create a list to hold all the box plots
@@ -56,10 +57,10 @@ for (var in vars_to_plot) {
 }
 
 # Use wrap_plots from patchwork to arrange plots in a grid
-combined_plot <- wrap_plots(box_plots, ncol = 3) + plot_annotation(title = "Box Plots of Selected Metrics by Cluster (Input)")
+combined_plot <- wrap_plots(box_plots, ncol = 4) + plot_annotation(title = "Box Plots of Selected Metrics by Cluster (Input)")
 
 # Print the combined plot
 print(combined_plot)
 
-ggsave(paste0("output/clustered/combined_clustered_boxplot.png"), plot = combined_plot, width = 6, height = 12, dpi = 600) # Adjust width and height
+ggsave(paste0("output/clustered/combined_clustered_boxplot.png"), plot = combined_plot, width = 8, height = 8, dpi = 600) # Adjust width and height
 

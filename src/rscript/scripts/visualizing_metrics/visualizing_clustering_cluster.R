@@ -49,12 +49,12 @@ create_cluster_boxplots <- function(data, cluster_number) {
   
   # Define the specific variables to plot
   vars_to_plot <- c(
-    "ankle_left_avg_height", "ankle_left_avg_acceleration_magnitude", "ankle_left_avg_velocity_magnitude",
-    "ankle_right_avg_height", "ankle_right_avg_acceleration_magnitude", "ankle_right_avg_velocity_magnitude",
-    "pelvis_avg_height", "pelvis_avg_acceleration_magnitude", "pelvis_avg_velocity_magnitude",
-    "solar_plexus_avg_height", "solar_plexus_avg_acceleration_magnitude", "solar_plexus_avg_velocity_magnitude",
-    "wrist_left_avg_height", "wrist_left_avg_acceleration_magnitude", "wrist_left_avg_velocity_magnitude",
-    "wrist_right_avg_height", "wrist_right_avg_acceleration_magnitude", "wrist_right_avg_velocity_magnitude", 
+    "ankle_left_avg_height", "ankle_left_avg_velocity_magnitude",
+    "ankle_right_avg_height", "ankle_right_avg_velocity_magnitude",
+    "pelvis_avg_height", "pelvis_avg_velocity_magnitude",
+    "solar_plexus_avg_height", "solar_plexus_avg_velocity_magnitude",
+    "wrist_left_avg_height", "wrist_left_avg_velocity_magnitude",
+    "wrist_right_avg_height", "wrist_right_avg_velocity_magnitude", 
     "pelvis_avg_distance_moved"
   )
   
