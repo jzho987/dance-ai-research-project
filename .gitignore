@@ -179,3 +179,4 @@ cython_debug/
 
 # Data (too big)
 src/rscript/data/raw
+src/rscript/data/processed
