@@ -13,8 +13,8 @@ import torch
 
 from models_v1.bailando_v1 import BailandoV1
 import config.config as cf
-import config.gpt_config as gpt_cf
-import config.vqvae_config as vq_cf
+import config.gpt_config_lb as gpt_cf
+import config.vqvae_config_lb as vq_cf
 from utils.format import format_rotmat_output
 from sanic.worker.manager import WorkerManager
 
