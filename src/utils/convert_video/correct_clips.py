@@ -29,9 +29,9 @@ def main(input_dir: str, output_dir: str):
         
         # flip
         # NOTE: recorded data is flipped, so we have to flip back
-        data = data.reshape(t, j // 3, 3)
-        data[:, :, 2] *= -1
-        data = data.reshape(t, j)
+        # data = data.reshape(t, j // 3, 3)
+        # data[:, :, 2] *= -1
+        # data = data.reshape(t, j)
 
         # save
         # NOTE: this is expecting <pure_name>.<extension>

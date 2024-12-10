@@ -4,8 +4,14 @@ import numpy as np
 import json
 from smplx import SMPLH
 from matplotlib.animation import FuncAnimation
+import argparse
 
-with open("./dance_0.json") as f:
+
+parser = argparse.ArgumentParser()
+parser.add_argument("file", type=str)
+args = parser.parse_args()
+
+with open(args.file) as f:
     keypoints_list = json.loads(f.read())
     print(np.shape(keypoints_list))
     # keypoints_list = np.load(f)
@@ -71,4 +77,5 @@ def update(frame):
 
 # Create the animation
 anim = FuncAnimation(fig, update, frames=len(keypoints_list), init_func=init, blit=False, interval=30)
+print("showing")
 plt.show()

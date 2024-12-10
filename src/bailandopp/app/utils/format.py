@@ -68,3 +68,12 @@ def format_rotmat_output(result, smpl):
     np_dance = (np_dance - roott).reshape((nn, cc))
     
     return np_dance.tolist()
+
+
+def format_output(result):
+    np_dance = np.array(result)
+
+    root = np_dance[:, :3]
+    np_dance = np_dance + np.tile(root, (1, 24))
+    np_dance[:, :3] = root
+    return np_dance.tolist()

@@ -10,12 +10,15 @@ from utils.format import format_rotmat_output
 import json
 import numpy as np
 import torch
+import math
 
 import config.config as cf
 import config.gpt_config as gpt_cf
 import config.vqvae_config as vq_cf
 
 DEFAULT_SAMPLING_RATE = 15360*2
+SHIFT_WIN = 29
+GENERATION_LENGTH = SHIFT_WIN * 4
 
 
 def parse_args():
@@ -123,57 +126,41 @@ def eval_all(agent: Bailando, dance_dir: str, music_dir: str, output_dir: str):
         music_dict[music] = music_data
     print("finished music data")
     for dance in tqdm(dances, desc=f"loading dance data"):
-        print(f"{dance_dir}, {dance}")
         dance_data_path = os.path.join(dance_dir, dance)
         with open(dance_data_path) as f:
             json_obj = json.loads(f.read())
-        dance_data = np.array(json_obj)
-        dance_dict[dance] = dance_data
-    smpl = SMPL(model_path=cf.smpl_model_path, gender='MALE', batch_size=1).to(torch.device("cuda"))
+        dance_data_list = np.array(json_obj)
+        dance_dict[dance] = dance_data_list
     
     # batching
-    batch_size = 3
-    batch_count = len(dances) // batch_size
+    batch_size = 30
+    batch_count = math.ceil(len(dances) / batch_size)
 
-    for music in musics:
+    for music in music_dict:
         music_data = music_dict[music]
-
         for i in tqdm(range(batch_count), desc=f"generating with music: {music}"):
             batch_start = i * batch_size
             batch_end = (i + 1) * batch_size
-            dance_data = []
-            dance_list = []
-            for dance in dances[batch_start: batch_end]:
-                dance_list.append(dance)
+            dance_data_list = []
+            dance_names_list = dances[batch_start: batch_end]
+            cur_batch_size = len(dance_names_list)
+            for dance in dance_names_list:
                 cur_dance_data = dance_dict[dance]
-                dance_data.append(cur_dance_data)
-            print(f"batched dance names: {len(dance_list)}")
-            print(f"batched dance size: {len(dance_data)}")
+                dance_data_list.append(cur_dance_data)
 
-            shift_win = 28
-            for win in range(1, 4):
-                print(np.shape(music_data))
-                multiplier = 10
-                music_data_repeated = torch.tensor(music_data).unsqueeze(0).repeat_interleave(multiplier * batch_size, dim=0)
-                print(music_data_repeated.shape)
-                dance_data_repeated = torch.tensor(dance_data).repeat_interleave(multiplier, dim=0)
-                print(dance_data_repeated.shape)
-                result, _ = agent.eval_raw(
-                    music_data_repeated, dance_data_repeated, cf.music_config, shift_win * (win + 1), 0, shift_win
-                )
-                result = result.cpu().numpy().tolist()
+            music_data_repeated = torch.tensor(music_data).unsqueeze(0).repeat_interleave(cur_batch_size, dim=0)
+            dance_data_list = torch.tensor(dance_data_list)
+            result, _ = agent.eval_raw(
+                music_data_repeated, dance_data_list, cf.music_config, GENERATION_LENGTH, 0, SHIFT_WIN
+            )
+            result = result.cpu().numpy().tolist()
 
-                for i in range(batch_size):
-                    dance_name = dance_list[i]
-                    result_start, result_end = i * multiplier, (i + 1) * multiplier
-                    dance_results = result[result_start: result_end]
-                    print(f"dance results length: {len(dance_results)}")
-
-                    name = f"{dance_name}-{music}-{win}win.json"
-                    output_path = os.path.join(output_dir, name)
-                    with open(output_path, "w") as f:
-                        json_str = json.dumps(dance_results)
-                        f.write(json_str)
+            for i, dance_name in enumerate(dance_names_list):
+                dance_results = result[i]
+                name = f"{dance_name}-{music}.json"
+                output_path = os.path.join(output_dir, name)
+                with open(output_path, "w") as f:
+                    f.write(json.dumps(dance_results))
 
 
 def decode(agent: Bailando, json_path, out_path):

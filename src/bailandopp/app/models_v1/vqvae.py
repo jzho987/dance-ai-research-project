@@ -1,7 +1,7 @@
 import numpy as np
 import torch as t
 import torch.nn as nn
-
+from easydict import EasyDict
 from models.encdec import Encoder, Decoder, assert_shape
 from models_v1.bottleneck import NoBottleneck, Bottleneck
 from utils.logger import average_metrics
@@ -43,6 +43,7 @@ def _loss_fn(x_target, x_pred):
 class VQVAE(nn.Module):
     def __init__(self, hps, input_dim=72):
         super().__init__()
+        hps = EasyDict(hps)
         self.hps = hps
         self.device = hps.device
         print("DEVICE" + hps.device)

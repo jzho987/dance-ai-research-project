@@ -1,7 +1,7 @@
 import numpy as np
 import torch as t
 import torch.nn as nn
-
+from easydict import EasyDict
 from models.encdec import Encoder, Decoder, assert_shape
 from models_v1.bottleneck import NoBottleneck, Bottleneck
 from utils.logger import average_metrics
@@ -17,32 +17,15 @@ def update(params):
 def calculate_strides(strides, downs):
     return [stride ** down for stride, down in zip(strides, downs)]
 
-# def _loss_fn(loss_fn, x_target, x_pred, hps):
-#     if loss_fn == 'l1':
-#         return t.mean(t.abs(x_pred - x_target)) / hps.bandwidth['l1']
-#     elif loss_fn == 'l2':
-#         return t.mean((x_pred - x_target) ** 2) / hps.bandwidth['l2']
-#     elif loss_fn == 'linf':
-#         residual = ((x_pred - x_target) ** 2).reshape(x_target.shape[0], -1)
-#         values, _ = t.topk(residual, hps.linf_k, dim=1)
-#         return t.mean(values) / hps.bandwidth['l2']
-#     elif loss_fn == 'lmix':
-#         loss = 0.0
-#         if hps.lmix_l1:
-#             loss += hps.lmix_l1 * _loss_fn('l1', x_target, x_pred, hps)
-#         if hps.lmix_l2:
-#             loss += hps.lmix_l2 * _loss_fn('l2', x_target, x_pred, hps)
-#         if hps.lmix_linf:
-#             loss += hps.lmix_linf * _loss_fn('linf', x_target, x_pred, hps)
-#         return loss
-#     else:
-#         assert False, f"Unknown loss_fn {loss_fn}"
+
 def _loss_fn(x_target, x_pred):
     return t.mean(t.abs(x_pred - x_target)) 
+
 
 class VQVAER(nn.Module):
     def __init__(self, hps, input_dim=72):
         super().__init__()
+        hps = EasyDict(hps)
         self.hps = hps
 
         self.device = hps.device
@@ -54,8 +37,6 @@ class VQVAER(nn.Module):
         l_bins = hps.l_bins
         mu = hps.l_mu
         commit = hps.commit
-        # spectral = hps.spectral
-        # multispectral = hps.multispectral
         multipliers = hps.hvqvae_multipliers 
         use_bottleneck = hps.use_bottleneck
         if use_bottleneck:

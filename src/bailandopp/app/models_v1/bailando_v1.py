@@ -14,7 +14,7 @@ import itertools
 import numpy as np
 import models
 import datetime
-from models_v1.sep_vqvae_root import VQVAER
+from models_v1.sep_vqvae_root import SepVQVAER
 from models_v1.cross_cond_gpt2_nm import CrossCondGPT2NoMusic
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ class BailandoV1():
         self.device = torch.device(device)
         torch.backends.cudnn.benchmark = True
 
-        vqvae = VQVAER(vqvae_cfg)
+        vqvae = SepVQVAER(vqvae_cfg)
         vqvae = nn.DataParallel(vqvae)
         checkpoint = torch.load(vq_ckpt_dir, map_location=self.device)
         vqvae.load_state_dict(checkpoint['model'], strict=False)
@@ -62,6 +62,7 @@ class BailandoV1():
 
         zs = gpt.module.sample(x, shift=shift, length=length)
         pose_sample = vqvae.module.decode(zs)
+        print(f"pose sample shape {pose_sample.shape}")
 
         # NOTE: previously this was checking if the global_vel value was true, and only then, do we run the below block.
         global_vel = pose_sample[:, :, :3].clone()

@@ -4,8 +4,6 @@ import json
 
 from utils.extractor import FeatureExtractor
 import numpy as np
-import base64
-import essentia
 from essentia.standard import *
 from smplx import SMPL
 import os
@@ -15,7 +13,7 @@ from models_v1.bailando_v1 import BailandoV1
 import config.config as cf
 import config.gpt_config_lb as gpt_cf
 import config.vqvae_config_lb as vq_cf
-from utils.format import format_rotmat_output
+from utils.format import format_output
 from sanic.worker.manager import WorkerManager
 
 # global
@@ -59,7 +57,7 @@ async def generate_dance_sequence(request):
 
     result, quant = await handle_generate_dance_sequence(start_frame_index=startFrameIndex, payload=payload, length=length, shift=shift, seed=seed)
     result = result.squeeze(0).cpu().numpy().tolist()
-    result = format_rotmat_output(result, app.ctx.smpl)
+    result = format_output(result)
     print(np.shape(result))
     app.ctx.prev = result
     quant_up, quant_down = quant

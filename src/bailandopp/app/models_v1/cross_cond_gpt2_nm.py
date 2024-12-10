@@ -6,6 +6,7 @@ GPT model:
     - all blocks feed into a central residual pathway similar to resnets
 - the final decoder is a linear projection into a vanilla Softmax classifier
 """
+from easydict import EasyDict
 import math
 import torch
 import torch.nn as nn
@@ -30,9 +31,10 @@ class CrossCondGPT2NoMusic(nn.Module):
     def sample(self, xs, shift: int, length: int):
         x_up, x_down = xs
         for k in range(length):
-            print(f"x up shape: {x_up.shape}, x down shape: {x_down.shape}")
-            x_up_input = x_up[:, -28:]
-            x_down_input = x_down[:, -28:]
+            x_up_input = x_up[:, -29:]
+            x_down_input = x_down[:, -29:]
+            print(f"up input shape: {x_up_input.shape}")
+            print(f"down input shape: {x_down_input.shape}")
             logits, _ = self.forward((x_up_input, x_down_input))
             logit_up, logit_down = logits
             logit_up = logit_up[:, -1, :]
@@ -135,6 +137,8 @@ class CrossCondGPTBaseNoMusic(nn.Module):
 
     def __init__(self, config):
         super().__init__()
+        config = EasyDict(config)
+
         self.tok_emb_up = nn.Embedding(config.vocab_size_up, config.n_embd  )
         self.tok_emb_down = nn.Embedding(config.vocab_size_down, config.n_embd)
         self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size*2, config.n_embd))
@@ -230,6 +234,7 @@ class CrossCondGPTHead(nn.Module):
 
     def __init__(self, config):
         super().__init__()
+        config = EasyDict(config)
 
         self.blocks = nn.Sequential(*[Block(config) for _ in range(config.n_layer)])
         # decoder head
