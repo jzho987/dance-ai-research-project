@@ -1,10 +1,11 @@
 import generate_features
 from tqdm import tqdm
 import polars as pl
+import argparse
 import os
 
 
-def main(input_dir: str):
+def main(input_dir: str, output_file: str):
     fnames = os.listdir(input_dir)
     df = pl.DataFrame()
     for name in tqdm(fnames):
@@ -13,8 +14,12 @@ def main(input_dir: str):
         df = df.vstack(feat_df)
     
     print(df)
-    df.write_csv("./features_complete.csv")
-    
+    df.write_parquet(output_file)
+
 
 if __name__ == "__main__":
-    main("./data/raw/complete")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", type=str)
+    parser.add_argument("--output", type=str)
+    args = parser.parse_args()
+    main(args.input, args.output)
