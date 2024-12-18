@@ -31,7 +31,7 @@ async def boostrap(app, loop):
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     print(f"use device: {device}")
     print(f"[BOOTSTRAP] Initializing AI Agent Model")
-    app.ctx.agent = BailandoV1(vq_cf, gpt_cf, cf, device, "./weight/vqvae_lb.pt", "./weight/gpt_lb.pt")
+    app.ctx.agent = BailandoV1(vq_cf, gpt_cf, cf, device, "./weight/vqvae_lb.pt", "./weight/gpt_lb_l_240.pt")
     print(f"[BOOTSTRAP] Initializing SMPL Model")
     app.ctx.smpl = SMPL(model_path=cf.smpl_model_path, gender='MALE', batch_size=1).to(torch.device(device))
     app.ctx.prev = []

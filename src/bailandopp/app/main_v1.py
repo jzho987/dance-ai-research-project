@@ -2,7 +2,6 @@ from models_v1.bailando_v1 import BailandoV1 as Altlando
 import argparse
 import os
 from tqdm import tqdm
-import essentia
 from essentia.standard import *
 from utils.extractor import FeatureExtractor
 from utils.format import format_output
@@ -12,8 +11,8 @@ import torch
 import math
 
 import config.config as cf
-import config.gpt_config as gpt_cf
-import config.vqvae_config as vq_cf
+import config.gpt_config_lb as gpt_cf
+import config.vqvae_config_lb as vq_cf
 
 DEFAULT_SAMPLING_RATE = 15360*2
 SHIFT_WIN = 29
@@ -41,7 +40,6 @@ def eval_all(agent: Altlando, dance_dir: str, output_dir: str):
         batch_end = (i + 1) * batch_size
         dance_data_list = []
         dance_names_list = dances[batch_start: batch_end]
-        cur_batch_size = len(dance_names_list)
         for dance in dance_names_list:
             cur_dance_data = dance_dict[dance]
             dance_data_list.append(cur_dance_data)
@@ -50,7 +48,12 @@ def eval_all(agent: Altlando, dance_dir: str, output_dir: str):
         result, _ = agent.eval_raw(
             dance_data_list, GENERATION_LENGTH, 0, SHIFT_WIN
         )
-        result = result.cpu().numpy().tolist()
+        np_dance = result.cpu().numpy()
+
+        root = np_dance[:, :, :3]
+        np_dance = np_dance + np.tile(root, (1, 1, 24))
+        np_dance[:, :, :3] = root
+        result = np_dance.tolist()
 
         for i, dance_name in enumerate(dance_names_list):
             dance_results = result[i]
@@ -79,7 +82,7 @@ def main():
     args = parser.parse_args()
 
     # build agent
-    agent = Altlando(vq_cf, gpt_cf, cf, "cuda", vq_ckpt_dir="./weight/vqvae_lb.pt", gpt_ckpt_dir="./weight/gpt_lb.pt")
+    agent = Altlando(vq_cf, gpt_cf, cf, "cuda", "./weight/vqvae_lb.pt", "./weight/gpt_lb.pt")
 
     # start eval
     if args.eval:

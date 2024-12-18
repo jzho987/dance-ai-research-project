@@ -5,7 +5,7 @@ import json
 
 
 def main():
-    input_dir = "./data/generated_data"
+    input_dir = "./data/generated_data_nm"
     for name in tqdm(os.listdir(input_dir)):
 
         full_path = os.path.join(input_dir, name)
@@ -27,7 +27,7 @@ def main():
 
 
         for i, res in enumerate(results):
-            full_out_path = os.path.join("./data/generated_data_roll", f"{name}_{i}.json")
+            full_out_path = os.path.join("./data/generated_data_nm_roll", f"{name}_{i}.json")
             with open(full_out_path, "w") as f:
                 f.write(json.dumps(res.tolist()))
 

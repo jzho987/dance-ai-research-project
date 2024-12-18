@@ -9,7 +9,7 @@ import os
 def main(input_dir: str):
     fnames = os.listdir(input_dir)
     df = pl.DataFrame()
-    out_path = "./data/features_complete_rolling"
+    out_path = "./data/generated_features_nm_roll"
     if not os.path.exists(out_path):
         os.makedirs(out_path)
 
@@ -59,4 +59,4 @@ def main(input_dir: str):
     df.write_parquet(full_out_path)
 
 if __name__ == "__main__":
-    main("./data/generated_data_split")
+    main("./data/generated_data_nm_roll")
