@@ -1,4 +1,2 @@
 # dance-ai-research-project
-The main repository for managing the research towards developing and deploying an interactive dance AI agent to research ML techniques and human interactions.
-
-[📄 Project Poster (PDF)](poster.pdf)
+![Poster](https://github.com/user-attachments/assets/ce7925a8-d481-4ff1-ac6f-5a93a44599a9)
