@@ -169,6 +169,9 @@ cython_debug/
 *.blg
 *.spl
 
+# keep poster
+!/poster.pdf
+
 # other files
 .DS_Store
 *.jpg
